@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}
+  {{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- breadcrumb -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">jobsite "{{object.Name}}" </li>
+  </ol>
+</nav>
+
+<h3>"{{jobsites.Name}}" {{action}}</h3>
+{{jobsites_list}}
+<div class="container">
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">name: <i>{{object.Name}}</i> </li>
+    <li class="list-group-item">description: <i>{{ object.Description }}</i></li>
+    <li class="list-group-item">address: <i>{{ object.Address }}</i></li>
+    <li class="list-group-item">owner: <i>{{ object.Owner }}</i></li>
+    <!-- <li class="list-group-item">type: {{ object.Type}}</li> -->
+    <hr>
+    {% if info %}
+      INFO from DB
+    {% else %}
+      No data from Database yet
+    {% endif %}
+
+  </ul>
+</div>
+
+
+<div class='container mt-2'>
+  <a type="button" href={% url 'jobsite-list'%} class="btn btn-primary mb-2 col-12 w-100">back to jobsites list</a>
+
+</div>
+{% endblock %}

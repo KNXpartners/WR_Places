@@ -1,0 +1,58 @@
+<div class="container">
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">name: <i>{{jobsite.Name}}</i> </li>
+    <li class="list-group-item">description: <i>{{ jobsite.Description }}</i></li>
+    <li class="list-group-item">address: <i>{{ jobsite.Address }}</i></li>
+    <li class="list-group-item">owner: <i>{{ jobsite.Owner }}</i></li>
+  </ul>
+</div>
+    <!-- <li class="list-group-item">type: {{ object.Type}}</li> -->
+<hr>
+<!-- includes -->
+{% for place in places %}
+<div class= "container">
+    <div class="alert alert-light">
+          <h6><a >{{place}}</a></h6>
+          <div>{% for p2p in place.places_place2place_Parent.all %}
+                  <p class="text-secondary small">
+                      {{forloop.counter}}. <i>{{p2p.Child}}</i>
+                  </p>
+              {% endfor %}</div>
+          <div class="btn-group">
+              <a href="{% url 'place-view' place.pk %}" type="button" class="btn btn-warning">Choose {{place.Type}} <b>{{place}}</b></a>
+              <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Edit place</a></li>
+                <li><a class="dropdown-item" href="#">Delete place</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Floor place</a></li>
+              </ul>
+          </div>
+    </div>
+</div>
+{%empty%}
+<div class="container">
+  No place inside yet
+  </div>
+{% endfor%}
+<div class= "container">
+{%  include 'Places/paginator.html' %}
+</div>
+<div class="container mb-2">
+  <div class="container mt-2">
+      <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
+          add place to {{place.Type}} {{place}}
+      </a>
+      <div class="row mb-2">
+        <div class="col">
+          <a type="button" href="#" class="btn btn-primary col-12">edit {{place}}</a>
+        </div>
+        <div class="col">
+          <a type="button" href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12">delete {{place}}</a>
+        </div>
+      </div>
+      <a type="button" href={% url 'jobsite-list'%} class="btn btn-info mb-2 col-12 ">back to jobsites list</a>
+  </div>
+</div>

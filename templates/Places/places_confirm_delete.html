@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}
+{{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- breadcrumb -->
+{% include  'Places/breadcrumb.html'%}
+
+<div class="container">
+  <h3>delete {{object}} </h3>
+  <p>in {{ parent.Name }}</p>
+
+  <hr>
+
+  <div class="container">
+      {% for device in device_list %}
+          {{device}}
+      {% endfor %}
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">description: <b>{{ object.Description }}</b></li>
+      <li class="list-group-item">type of place: <b>{{ object.Type }}</b></li>
+
+    <form method="post" class="mb-2">{% csrf_token %}
+        <p>Are you sure to delete "{{ object.Name }}"?</p>
+        <!-- <input type="submit" value="Confirm"> -->
+        {% bootstrap_button "Delete" button_type="submit" button_class="btn-warning" %}
+      </form>
+    <a  type="button" href={{object.get_absolute_url}} class="btn btn-primary btn-block">back to {{ object }}</a>
+    </ul>
+
+  </div>
+</div>
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,21 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb" style="font-size: 13px">
+    {% if type == 'jobsite' %}
+      <li class="breadcrumb-item active" aria-current="page">{{breadcrumb.0.type}} {{breadcrumb.0.Name}}</li>
+    {% else %}
+    {% for br in breadcrumb %}
+      {% if forloop.first %}
+        <li class="breadcrumb-item"><a href={% url br.url br.place_pk  %}>jobsite "{{br.Name}}"</a> </li>
+      {% elif forloop.last %}
+        <li class="breadcrumb-item active" aria-current="page"><i><b>{{br.Name}}</b></i> (level:{{breadcrumb|length}}) </li>
+      {% else %}
+        {% if br.type == 'place'  %}
+          <li class="breadcrumb-item"><a href={% url br.url br.place_pk  %}>{{br.Name}} </a></li>
+        {% elif br.type == 'device' %}
+          <li class="breadcrumb-item"><a href={% url br.url br.dev_pk  %}>{{br.Name}} </a></li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% endif%}
+  </ol>
+</nav>

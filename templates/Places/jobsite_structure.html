@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+{% block title %}
+  {{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- Places_list.html -->
+
+{% include  'Places/breadcrumb.html'%}
+{{html_code|safe}}
+<!-- buttons create devices -->
+{% endblock content %}
+{% block aside-block %}
+<div class="container">
+  <ul class="list-group list-group-flush">
+      <li class="list-group-item">Qty of  places : <i>{{all_places_qty}}</i> </li>
+      <li class="list-group-item">Qty of  abstract places : <i>{{abstract}}</i> </li>
+      <li class="list-group-item">Qty of  not abstract places : <i>{{not_abstract}}</i> </li>
+     {% for key, value in statistic.items %}
+    <li class="list-group-item">Qty of  "{{key}}" : <i>{{value}}</i> </li>
+    {% endfor%}
+  </ul>
+</div>
+
+{% endblock aside-block %}

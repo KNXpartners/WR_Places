@@ -1,0 +1,34 @@
+
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+{% block title %}
+  {{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- Places_list.html -->
+
+{% include  'Places/breadcrumb.html'%}
+  <!-- create device form -->
+  <h6 class="mt-4 ">add place to {{parent_place}}</h6>
+  <div class="container "> <span  >Existing places at {{parent_place}}</span>
+      {% for p2p in parent_place.places_place2place_Parent.all %}
+          <p class="text-secondary small  mb-0">
+              {{forloop.counter}}. <i>{{p2p.Child}}</i>
+          </p>
+      {% endfor %}</div>
+  <form method="post" class="form mb-2">{% csrf_token %}
+    {% bootstrap_form form %}
+    {% bootstrap_button "create new place" button_type="submit" button_class="btn-primary w-100" %}
+  </form>
+
+
+
+
+
+
+{% endblock content %}
+{% block aside-block %}
+ right block local
+{% endblock aside-block %}

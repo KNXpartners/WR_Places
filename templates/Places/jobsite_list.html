@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+
+{% block title %}
+{{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- breadcrumb -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">Jobsites</li>
+
+  </ol>
+</nav>
+
+
+{% for jobsite in jobsites %}
+<div class="alert alert-light">
+  <h1>{{ jobsite.Name }}</h1>
+  <p>{{ jobsite.Description|striptags|truncatechars:200 }}</p>
+  <div class="d-flex">
+    <div>
+      <img src="{{ jobsite.Author.profile.img.url }}" alt="{{ jobsite.Author }}" class="user_images">
+    </div>
+    <div class="mt-2">
+      <span class="text-muted">Started at: {{ jobsite.Date|date:"d E Y в H:i" }}</span>
+      <p><b>Installer:</b> <a href="#">{{ jobsite.Author }}</a></p>
+    </div>
+  </div>
+
+
+  <div class="btn-group">
+    <a href="{% url 'place-view' jobsite.id %}" type="button" class="btn btn-warning">Choose jobsite {{jobsite.Name}}</a>
+    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
+      aria-expanded="false">
+      <span class="visually-hidden">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="#">Edit project</a></li>
+      <li><a class="dropdown-item" href="#">Arhive project</a></li>
+      <li>
+        <hr class="dropdown-divider">
+      </li>
+      <li><a class="dropdown-item" href="#">Project status</a></li>
+    </ul>
+  </div>
+</div>
+{% endfor %}
+
+{% if is_paginated %}
+<nav aria-label="paginationlabel">
+  <ul class="pagination mt-2">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for i in paginator.page_range %}
+      {% if page_obj.number == i %}
+        <li class="page-item active" aria-current="page">
+          <a class="page-link">{{ i }}</a>
+        </li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
+  <p>
+    <a href="{% url 'create-jobsite' %}" class="btn btn-outline-info mt-2  btn-block">add jobsite</a>
+  </p>
+
+  {% endblock %}
+
+
+  {% block aside-block %}
+  <img src="https://itproger.com/img/courses/1601651547.jpg" class="ímg-thumbnail mt-2">
+  <p>"Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
+    aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. </p>
+  <a href="https://zen.yandex.ru/media/steklo_skazka/vse-znaiut-chto-uggi-izobreli-v-avstralii-no-malo-kto-znaet-pochemu-izza-etogo-ia-by-ne-hotel-tam-jit-604f372a0a7d51654a6c39d9"
+    target="_blank">
+    <button class="btn btn-warning">Посмотреть</button>
+  </a>
+
+  <img src="https://itproger.com/img/courses/1479108898.jpg" class="ímg-thumbnail mt-4">
+  <p>"Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
+    aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. </p>
+  <a href="https://itproger.com/course/python" target="_blank">
+    <button class="btn btn-warning">Посмотреть</button>
+  </a>
+  {% endblock %}

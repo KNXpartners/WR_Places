@@ -1,0 +1,201 @@
+
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+{% block title %}
+  {{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- Places_list.html -->
+
+{% include  'Places/breadcrumb.html'%}
+<!-- <div class="container"><h3>"{{js.Name}}" {{action}}</h3>
+  type: {{type}} <br>
+  {{object_list}}
+</div> -->
+<!-- jobsite -->
+{% if type == 'jobsite' %}
+  {% include 'places/jobsite.html' %}
+<!-- NOT jobsite -->
+{% else %}
+  <div class="container mt-1">
+
+      <figure>
+        <blockquote class="blockquote">
+          <p><b>{{place}} (<i class="small text-secondary">{{place.Type}}</i>)</b></p>
+        </blockquote>
+        <figcaption class="blockquote-footer">
+          at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i >{{parent.Type}}</i>) </b></a></cite>
+        </figcaption>
+      </figure>
+
+
+<!-- {{dev}} <br>
+{{dev.Device}} <br>
+{{dev.Cabinet}} <br>
+Abstract: {{place.Type.Abstract}} -->
+
+    <div class="d-flex flex-column align-items-start ">
+        <!-- <p class="order-0 p-2" ><p class="align-self-start">details of <b>{{place}}(<i>{{place.Type}}</i>)</b>
+            @
+            <a href={{parent.get_absolute_url}}><b>{{parent}}(<i>{{parent.Type}}</i>) </b>.</a> -->
+        <p>Created at: <i>{{place.Date}}</i></p>
+        {% if place.Description %}
+            <p>Description: <i>{{place.Description}}</i></p>
+        {% endif %}
+        {% if places|length > 0 or dev  %}
+        <p>Contains: <i>{{child_count}} place{{places|pluralize}}
+            {% if not place.Type.Abstract %}
+            , {{dev.Device|length}} device{{dev.Device|pluralize}}, {{dev.Cabinet|length}} cabinet{{dev.Cabinet|pluralize}}</i></p>
+            {%endif%}
+        {% else %}
+            <p>No places in <i> {{place}} </i> yet</p>
+        {% endif %}
+        <p>Here a information about functions in this {{place.Type.Name}} by installer  <b>"{{request.user.username}}"</b>
+        </p>
+        <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p>
+          <!-- <p class="align-self-start">{{room}} <br> number {{room.rNumber}},  {{room.rType}} , list of functions
+            </p> -->
+            <!-- <p>{%lorem%}</p> -->
+    </div>
+    <p class="align-self-end" style="font-size: 10px">request.path_info= <i>"{{request.path_info}}"</i>
+    </p>
+  </div>
+  <hr>
+  <!-- places -->
+  <!-- <h6>include places</h6> -->
+
+ <div class="container">
+     <h6>iclude place(s)</h6>
+     {% include 'Places/show_places.html' %}<!-- start paginator buttons -->
+     {% include 'Places/paginator.html'%}</div>
+  <!-- add place -->
+  <div class="container mb-2">
+    <div class="container mt-2">
+        <!-- <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
+            {{btn_text}} to {{place}}
+        </a> -->
+        <button type="button" class="btn btn-lg btn-primary col-12 mb-2 " >{{btn_text}} to {{place}}</button>
+        <div class="row mb-2">
+          <div class="col col-6">
+            <a href="#" class="btn btn-primary col-12">edit {{place}}</a>
+            <!-- <button type="button" class="btn btn-primary col-12 " >edit {{place}}</button> -->
+          </div>
+          <div class="col">
+              {% if device_count %}
+                    <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12 disabled" role="button" aria-disabled="true">delete {{place}} ({{device_count}})</a>
+                    <!-- <button type="button" class="btn btn-primary col-12 " disabled>delete {{place}} ({{device_count}})</button> -->
+                {% else %}
+                    <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12" role="button">delete {{place}} with {{device_count}} devices</a>
+                    <!-- <button type="button" class="btn btn-primary col-12 " >delete {{place}}</button> -->
+              {% endif%}
+          </div>
+        </div>
+        <a type="button" href={{ parent.get_absolute_url }} class="btn btn-outline-primary mt-2 col-12">
+            back to {{parent}}</a>
+        <!-- <button type="button" href={{ parent.get_absolute_url }} class="btn btn-info mt-2 col-12" >back to {{parent}}</button> -->
+      </div>
+  </div>
+
+<!-- buttons create devices -->
+{% if place.Type.Abstract is not True %}
+<hr>
+  <div class="container mt-2">
+  <div class="container mt-2">
+    <a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">create cabinet</a>
+    <a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">create device</a>
+  </div>
+  </div>
+  {% endif %}
+
+
+
+
+{% endif %}
+
+
+{% endblock content %}
+{% block aside-block %}
+
+
+
+{% if type == 'jobsite' %}
+<div class="container small">
+    <h6>statistic</h6>
+  <ul class="list-group list-group-flush">
+      <li class="list-group-item">Qty of  places : <i>{{statistic.places.all_places_qty}}</i> </li>
+      <li class="list-group-item">Qty of  abstract places : <i>{{statistic.places.abstract}}</i> </li>
+      <li class="list-group-item">Qty of  not abstract places : <i>{{statistic.places.not_abstract}}</i> </li>
+     {% for key, value in statistic.places.type.items %}
+        {% if  value %}
+            <li class="list-group-item">Qty of  "{{key}}" : <i>{{value}}</i> </li>
+        {% endif %}
+    {% endfor%}
+    <span> <hr> </span>
+     {% for key, value in statistic.device.type.items %}
+     {% if  value %}
+    <li class="list-group-item">Qty of  "{{key}}": <i>{{value}}</i> </li>
+    {% endif %}
+    {% endfor%}
+    <span> <hr> </span>
+     {% for key, value in statistic.wire.WirePurpose.items %}
+     {% if  value %}
+    <li class="list-group-item">Qty of  "{{key}}" cables: <i>{{value}}</i> </li>
+    {% endif %}
+    {% endfor%}
+
+  </ul>
+</div>
+<!-- NOT jobsite -->
+{% else %}
+<div class="container mt-3">
+  <h6 class="mt-2">list of device</h6>
+  <div class="accordion" id="deviceAccordion">
+      {% for key, values in dev.items %}
+      <div class="accordion-item">
+          <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+              {% if forloop.first %}
+              <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+                  aria-controls="collapse{{ forloop.counter }}">
+                  {{key}}
+              </button>
+              {% else %}
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                  aria-controls="collapse{{ forloop.counter }}">
+                  {{key}}
+              </button>
+              {% endif %}
+          </h2>
+          {% if forloop.first %}
+          <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show "
+              aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
+              <div class="accordion-body">
+                  {% for v in values %}
+                  <p><a href="{% url 'dev-details-view'  dev_pk=v.id %}">
+                    {{ v.Name }} </a>
+                    <!-- {{ v.id }} wired from {{ v.WireTo_Name }}@{{v.placed_at|default:'None'}} -->
+                  </p>
+                  {% endfor %}
+              </div>
+          </div>
+          {% else %}
+          <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+              aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
+              <div class="accordion-body">
+                  {% for v in values %}
+                  <p><a href="{% url 'dev-details-view' dev_pk=v.id %}">
+                    {{ v.Name }} </a>
+                  </p>
+                  {% endfor %}
+              </div>
+          </div>
+          {% endif %}
+      </div>
+      {% endfor %}
+  </div>
+</div>
+{%endif%}
+{% endblock aside-block %}
