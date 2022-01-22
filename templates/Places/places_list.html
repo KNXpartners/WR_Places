@@ -73,10 +73,10 @@ Abstract: {{place.Type.Abstract}} -->
   <!-- add place -->
   <div class="container mb-2">
     <div class="container mt-2">
-        <!-- <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
+        <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
             {{btn_text}} to {{place}}
-        </a> -->
-        <button type="button" class="btn btn-lg btn-primary col-12 mb-2 " >{{btn_text}} to {{place}}</button>
+        </a>
+        <!-- <button type="button" class="btn btn-lg btn-primary col-12 mb-2 " >{{btn_text}} to {{place}}</button> -->
         <div class="row mb-2">
           <div class="col col-6">
             <a href="#" class="btn btn-primary col-12">edit {{place}}</a>
@@ -87,7 +87,7 @@ Abstract: {{place.Type.Abstract}} -->
                     <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12 disabled" role="button" aria-disabled="true">delete {{place}} ({{device_count}})</a>
                     <!-- <button type="button" class="btn btn-primary col-12 " disabled>delete {{place}} ({{device_count}})</button> -->
                 {% else %}
-                    <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12" role="button">delete {{place}} with {{device_count}} devices</a>
+                    <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12" role="button">delete {{place}}</a>
                     <!-- <button type="button" class="btn btn-primary col-12 " >delete {{place}}</button> -->
               {% endif%}
           </div>
