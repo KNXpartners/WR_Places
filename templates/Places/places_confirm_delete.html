@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
+{% load i18n %}
 
 {% block title %}
 {{title}}
@@ -8,11 +9,11 @@
 
 {% block content %}
 <!-- breadcrumb -->
-{% include  'Places/breadcrumb.html'%}
+{% include  'breadcrumb.html'%}
 
 <div class="container">
-  <h3>delete {{object}} </h3>
-  <p>in {{ parent.Name }}</p>
+  <h3>{% trans "delete" %} {{object}} </h3>
+  <p>@ {{ parent.Name }}</p>
 
   <hr>
 
@@ -21,15 +22,15 @@
           {{device}}
       {% endfor %}
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">description: <b>{{ object.Description }}</b></li>
-      <li class="list-group-item">type of place: <b>{{ object.Type }}</b></li>
+      <li class="list-group-item">{% trans "description" %}: <b>{{ object.Description }}</b></li>
+      <li class="list-group-item">{% trans "type" %}: <b>{{ object.Type }}</b></li>
 
     <form method="post" class="mb-2">{% csrf_token %}
-        <p>Are you sure to delete "{{ object.Name }}"?</p>
+        <p>{% trans "Are you sure to delete" %} "{{ object.Name }}"?</p>
         <!-- <input type="submit" value="Confirm"> -->
-        {% bootstrap_button "Delete" button_type="submit" button_class="btn-warning" %}
+        {% bootstrap_button submit_button_text button_type="submit" button_class="btn-warning w-100" %}
       </form>
-    <a  type="button" href={{object.get_absolute_url}} class="btn btn-primary btn-block">back to {{ object }}</a>
+    <a  type="button" href={{object.get_absolute_url}} class="btn btn-primary btn-block mt-2 w-100">{% trans "back to" %} {{ object }}</a>
     </ul>
 
   </div>

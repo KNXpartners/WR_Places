@@ -20,68 +20,93 @@ from django.http import Http404, HttpResponseNotFound,HttpResponseRedirect
 from Devices.forms import chooseDeviceType
 from Devices.models import Device2Place, DeviceType, Device
 import logging
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
+from django.utils.text import format_lazy
+from django.contrib import messages
+# from django.contrib.messages.views import SuccessMessageMixin
+from utils import *
+
+
 
 
 logger = logging.getLogger(__name__)
 # print(__name__)
 
 
-class BreadcrumbMixin:
-    def breadcrumb_list(self, l, pk):
-        if jobsite.objects.filter(pk=pk).exists():
-            d={}
-            d['place_pk'] =pk
-            d['Name'] = jobsite.objects.get(pk=pk)#.Name
-            d['url'] ='place-view'
-            d['type'] = 'jobsite'
-            l.insert(0, d)
-            return l
-        else:
-            d={}
-            d['place_pk'] =pk
-            d['Name'] = Places.objects.get(pk=pk)#.Name
-            d['url'] ='place-view'
-            d['type'] = 'place'
-            l.insert(0, d)
-            p = Places.objects.get(pk=pk)
-            par_pk = Places.objects.get(places_place2places_Parent__Child = p).pk
-            self.breadcrumb_list(l, par_pk)
+# class BreadcrumbMixin:
+#     def breadcrumb_list(self, l, pk):
+#         if jobsite.objects.filter(pk=pk).exists():
+#             d={}
+#             d['place_pk'] =pk
+#             d['Name'] = jobsite.objects.get(pk=pk)#.Name
+#             d['url'] ='place-view'
+#             d['type'] = 'jobsite'
+#             l.insert(0, d)
+#             return l
+#         else:
+#             d={}
+#             d['place_pk'] =pk
+#             d['Name'] = Places.objects.get(pk=pk)#.Name
+#             d['url'] ='place-view'
+#             d['type'] = 'place'
+#             l.insert(0, d)
+#             p = Places.objects.get(pk=pk)
+#             par_pk = Places.objects.get(places_place2places_Parent__Child = p).pk
+#             self.breadcrumb_list(l, par_pk)
 
 
 class jobsiteCreateView(LoginRequiredMixin, CreateView):
     model = jobsite
     form_class  = jobsiteForm
+    # extra_context = {'title': _(''), 'submit_button_name' : _('create') + ' ' + _('jobsite'),
+    # 'parent_place': _('jobsite') + ' ' + _('list'),
+    # 'parent_url' : reverse('jobsite-list')
+    # }
 
     def form_valid(self, form):
         form.instance.Author = self.request.user #fix jobsite to User
         form.instance.Type  = PlaceType.objects.get(pk=1) # fix Place to jobsite type
         return super().form_valid(form)
 
-
-class jobsiteDetailsView(LoginRequiredMixin, ListView):
-    # model = Place2Place
-    # form_class  = jobsiteForm
-    # context_object_name = 'jobsites'
-
-
     def get_context_data(self, **kwargs):
+        user=get_object_or_404(User, pk=self.request.user.pk)
+        # print('foo = ', self.request.GET.get('foo', None))
+        # print('ttype = ', self.request.GET.get('ttype', None))
         context = super().get_context_data(**kwargs)
-        logger.info(f'jobsiteDetailsView kwargs: {self.kwargs}')
         context.update(self.kwargs)
-
-        context['action'] = 'jobsite details (2)'
-        context['js'] = jobsite.objects.get(pk=self.kwargs['pk'])
-        print('id=', context['js'].id)
-        # context['title'] = 'places'
-        # context['btn_text'] = 'add place'
-
+        context['parent_url'] = reverse_lazy('jobsite-list')
+        context['title'] = _('create jobsite')
+        context['submit_button_name'] = _('create jobsite')
+        context['parent_place'] = _('jobsite list')
+        print(context)
         return context
 
-    def get_queryset(self): #list of childs
-        user=get_object_or_404(User, pk=self.request.user.pk)#change to current user
-        # qs = User.objects.get(pk=1)
-        # print(jobsite.objects.filter(Author = user))
-        return Place2Place.objects.filter(Parent = self.kwargs['pk'])
+
+# class jobsiteDetailsView(LoginRequiredMixin, ListView):
+#     # model = Place2Place
+#     # form_class  = jobsiteForm
+#     # context_object_name = 'jobsites'
+#
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         logger.info(f'jobsiteDetailsView kwargs: {self.kwargs}')
+#         context.update(self.kwargs)
+#
+#         context['action'] = _('jobsite details')
+#         context['js'] = jobsite.objects.get(pk=self.kwargs['pk'])
+#         print('id=', context['js'].id)
+#         # context['title'] = 'places'
+#         # context['btn_text'] = 'add place'
+#
+#         return context
+#
+#     def get_queryset(self): #list of childs
+#         user=get_object_or_404(User, pk=self.request.user.pk)#change to current user
+#         # qs = User.objects.get(pk=1)
+#         # print(jobsite.objects.filter(Author = user))
+#         return Place2Place.objects.filter(Parent = self.kwargs['pk'])
 
 
 class jobsiteListView(LoginRequiredMixin, ListView):
@@ -103,19 +128,39 @@ class jobsiteListView(LoginRequiredMixin, ListView):
         return context
 
 
-class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
-    #model = Places #have number of Place.ID
-    # template  = 'Places_list'
+class JobsiteUpdateView(LoginRequiredMixin, UpdateView):
+    model = jobsite
+    pk_url_kwarg = 'place_pk'
+    form_class  = jobsiteForm
+    extra_context = {'title': _('edit')+ ' ' + _('jobsite')}
+
+    def get_context_data(self, **kwargs):
+        user=get_object_or_404(User, pk=self.request.user.pk)
+        # print('foo = ', self.request.GET.get('foo', None))
+        # print('ttype = ', self.request.GET.get('ttype', None))
+        context = super().get_context_data(**kwargs)
+        context.update(self.kwargs)
+        # logger.info(f'!!!!!!!!!!  kwargs:{self.kwargs}||| context:{context}' )
+        _js_pk = self.kwargs['place_pk']
+        _js = Places.objects.get(pk=_js_pk)
+        context['type'] = _js.Type.Name
+        context['submit_button_name'] = _('update') +' '+_('jobsite')
+        context['parent_place'] = str(_js)
+        context['parent_url'] = self.object.get_absolute_url()
+        return context
+
+    def form_valid(self, form):
+        _r = form.save(commit=True)
+        # print('r:', _r.pk)
+        _mes = gettext_lazy('jobsite %(p)s updated') % {'p':self.object}
+        messages.info(self.request, _mes)
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class placeView(LoginRequiredMixin, ListView):
     context_object_name = 'places'
     paginate_by = 6
-
-    # def get(self, request, *args, **kwagrs):
-    #     # either
-    #     # self.object_list = self.get_queryset()
-    #     # self.object_list = self.object_list.filter(lab__acronym=kwargs['lab'])
-    #     print(self.kwargs)
-    #     context = self.get_context_data()
-    #     return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         user=get_object_or_404(User, pk=self.request.user.pk)
@@ -128,15 +173,14 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
         p = Places.objects.get(pk=pk)
         context['type'] = p.Type.Name
         context['place'] = p
-        context['btn_text'] = 'add place to '
+        # context['btn_text'] = 'add place to '
         context['child_count'] = Places.objects.filter(places_place2places_Child__Parent_id = pk).count()
         context['device_count'] = Device2Place.objects.filter(Parent_id = pk).count()
+        if context['device_count'] or context['child_count'] :
+            context['delete_button']  = 'disabled'
         # context['form_create'] = chooseDeviceType(initial={'connected_to_place':pk, 'type_of_variant':1})
         ls =[]
-
-
-
-        if p.Type.Name == 'jobsite':
+        if context['type'] == 'jobsite':
             '''jobsite '''
             self.author = jobsite.objects.get(pk=pk).Author
             #Places.objects.get(pk=pk).jobsite.Author - variant
@@ -145,8 +189,8 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
                 raise Http404 #return context
             js = jobsite.objects.get(pk=pk)
             context['jobsite'] =js
-            self.breadcrumb_list(ls, pk)
-            context['breadcrumb'] = ls
+            # self.breadcrumb_list(ls, pk)
+            # context['breadcrumb'] = ls
 
             js_pk= pk
             context['statistic'] = {}
@@ -165,14 +209,22 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
 
             context['statistic']['device']={}
             context['statistic']['device']['type']={}
-            for d in DeviceType.objects.all():
-                context['statistic']['device']['type'][d.Name] = Device.objects.filter(Type = d, devices_device2places_Device__jobsite = js).count()
+            #Translation
 
-            logger.info(f'context: 0x0000026912596460 {context}')
+            for d in DeviceType.objects.all():
+                _c = Device.objects.filter(Type = d, devices_device2places_Device__jobsite = js).count()
+                if _c != 0:
+                    context['statistic']['device']['type'][d.Name.lower()] = _c
+                else:
+                    context['statistic']['device']['type'] = None
+            context['title'] = p.Name
+            context['parent_url'] = reverse('jobsite-list')
+            context['back_to_button'] = _('jobsite list')
+            logger.info(f'context: {context}')
             '''jobsite end'''
         else:
             ''' not jobsite, -plain place'''
-            js = Places.objects.get(pk=pk).places_place2place_Child.first().jobsite
+            js = Places.objects.get(pk=pk).places_place2place_Child.get().jobsite
             author = jobsite.objects.get(pk=js.pk).Author
             if author != user:
                 context['action'] = 'forbidden'
@@ -181,7 +233,7 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
             context['jobsite'] = js
             context['title'] = p.Name
             context['action'] = context['type'] + ' details'
-            context['parent'] = Place2Place.objects.filter(Child = p).first().Parent#doubtful ambiguous
+            context['parent'] = Place2Place.objects.get(Child = p).Parent#doubtful ambiguous
             # query for Devices for this places
             context['devices'] = Device2Place.objects.select_related('Child').filter(Parent__id = pk)
             context['listOfTypes'] = []
@@ -207,14 +259,16 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
             # context['listOfDevice'] = list_of_devices
             # print(context['dev'])
             # print('list_of_devices==', list_of_devices)
-            ls =[]
-
-
-            self.breadcrumb_list(ls, pk)
-            # context['place_level'] = len(ls)
-            context['breadcrumb'] = ls
+            # ls =[]
+            #
+            #
+            # self.breadcrumb_list(ls, pk)
+            # # context['place_level'] = len(ls)
+            # context['breadcrumb'] = ls
+            context['parent_url'] = context['parent'].get_absolute_url()
+            context['back_to_button'] = context['parent']
             ''' not jobsite, - plain place end'''
-
+        context['breadcrumb'] = breadcrumb_list(self, place_pk = pk)
         # print('context : ' , context)
         logger.info(f'This is context {self.cls_name }: {context}')
         return context
@@ -247,29 +301,61 @@ class placeView(LoginRequiredMixin, ListView, BreadcrumbMixin):
         return Places.objects.filter(places_place2places_Child__Parent_id = pk)
 
 
-class placeCreateView(LoginRequiredMixin,CreateView,BreadcrumbMixin):
+class placeCreateView(LoginRequiredMixin,CreateView):
     model = Places
     form_class = PlacesForm
+    # success_message = "%(Name)s was created successfully"
+
+    # def get_success_message(self, cleaned_data):
+    #     print('object', self.object)
+    #     print('cleaned_data :',cleaned_data)
+    #
+    #     return "%(inst)s was created successfully" % {'inst': self.object}
 
     def form_valid(self, form):
-        self.object = form.save()
+        self.object = form.save(commit = False)
+        # print('place form DN:', self.object.DesignNumber)
         # logger.info(f'form placeCreateView: {form}')
+        #collect all DesignNumber to compare
+        # print(self.request)
+        # print('object pk', self.object.pk)
+
+        _r = form.save(commit=True)
+        # print('r:', _r.pk)
+        _mes = gettext_lazy('Place %(p)s created') % {'p':self.object}
+        messages.info(self.request, _mes)
 
         parent_place_pk = self.request.GET.get('place', None)
+        if not parent_place_pk:
+            raise Http404('no parent place pk')
         self.parent = Places.objects.get(pk=parent_place_pk)
         if self.parent.Type.Name == 'jobsite':
             self.js = jobsite.objects.get(pk=parent_place_pk)
         else:
-            self.js = self.parent.places_place2place_Child.first().jobsite
+            self.js = self.parent.places_place2place_Child.get().jobsite
             # parent_abstract = self.parent.places_place2place_Child.first().ParentAbstract
         if not self.object.Type.Abstract:
             if self.parent.Type.Abstract:
                 parent_abstract = self.parent
             else:
-                parent_abstract = self.parent.places_place2place_Child.first().ParentAbstract
+                parent_abstract = self.parent.places_place2place_Child.get().ParentAbstract
+            #check DesignNumber
+            design_numbers_at_abstract = Places.objects.filter(places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk).values_list('DesignNumber', flat=True)
+            # print(Places.objects.filter(DesignNumber = self.object.DesignNumber).exclude(pk = _r.pk).exists())
+            # print(design_numbers_at_abstract	)
+            if Places.objects.filter(DesignNumber = self.object.DesignNumber, places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk).exists():
+                # _existing_place = []
+                # Places.objects.filter(DesignNumber = self.object.DesignNumber, places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk):
+                _mes = _('you have place with same Design Nimber #')
+                _mes +=( f'{self.object.DesignNumber} -- ')
+                _mes += (f"{', '.join(str(x) for x in Places.objects.filter(DesignNumber = self.object.DesignNumber, places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk) )}")
+                    # _mes += (f'- {x}' for x in _existing_place)
+                messages.info(self.request, _mes)
+                # print('number repeat')
         else:
-            parent_abstract = None
-        logger.info(f'parent abstract - {parent_abstract}')
+            # parent_abstract = None
+            parent_abstract = self.parent
+        # logger.info(f'parent abstract - {parent_abstract}')
         self.new_connection_to_place = Place2Place.objects.create(
             Child = self.object,
             Parent = self.parent,
@@ -288,27 +374,161 @@ class placeCreateView(LoginRequiredMixin,CreateView,BreadcrumbMixin):
         return self.__class__.__name__
 
     def get_context_data(self, **kwargs):
+        user=get_object_or_404(User, pk=self.request.user.pk)
         context = super().get_context_data(**kwargs)
         context.update(self.kwargs)
-        context['title'] = 'add place'
+        # pk = self.kwargs['place_pk']
+        # p = Places.objects.get(pk=pk)
+        context['title'] = _('create place')
         context['parent_place'] = Places.objects.get(pk=self.request.GET.get('place', None))
-        context['form'].fields['Type'].queryset = PlaceType.objects.filter(
-        places_inheritances_Child__Parent__Name = context['parent_place'].Type)
+        context['parent_url'] = context['parent_place'].get_absolute_url()
+
+        context['form'].fields['Type'].choices = [(k[0],_(k[1])) for k in PlaceType.objects.filter(places_inheritances_Child__Parent__Name = context['parent_place'].Type).values_list('id', 'Name')]
+        # context['form'].fields['Type'].queryset = PlaceType.objects.filter(
+        # places_inheritances_Child__Parent__Name = context['parent_place'].Type)
+
         # context['form'].fields['Type'].queryset = PlaceType.objects.all().exclude(Name__in = ['jobsite',])
-        ls =[]
-        self.breadcrumb_list(ls, context['parent_place'].pk)
-        ls.append({'Name':'create place',
-            'place_pk': 1,
-            'url': 'place-view',
-            'type' : 'place'})
-        context['breadcrumb'] = ls
+        # ls =[]
+        # self.breadcrumb_list(ls, context['parent_place'].pk)
+        # ls.append({'Name':_('create place'),
+        #     'place_pk': 1,
+        #     'url': 'place-view',
+        #     'type' : 'place'})
+        # context['breadcrumb'] = ls
+        context['breadcrumb'] = breadcrumb_list(self, place_pk = context['parent_place'].pk)
+        pr(context['breadcrumb'], 'debug')
+        if context['parent_place']:
+            if context['parent_place'].Type.Name == 'jobsite':
+                js = jobsite.objects.get(pk=context['parent_place'].pk)
+                self.author = js.Author
+                if self.author != user:
+                    context['action'] = 'forbidden'
+                    raise Http404 #return context
+                context['jobsite'] =js
+            else:
+                js = Places.objects.get(pk=context['parent_place'].pk).places_place2place_Child.get().jobsite
+                author = js.Author
+                if author != user:
+                    context['action'] = 'forbidden'
+                    raise Http404 #return context
+                context['jobsite'] = js
 
         logger.info(f'context {{self.cls_name}}: {context}')
         self.context = context
         return context
 
 
-class placeDeleteView(LoginRequiredMixin, DeleteView, BreadcrumbMixin):
+class PlaceUpdateView(LoginRequiredMixin, UpdateView):
+    model = Places
+    fields = ('Name', 'DesignNumber', 'Description')
+    # form_class = PlacesForm
+    pk_url_kwarg = 'place_pk'
+    template_name = 'Places\place_update_form.html'
+
+    def get_context_data(self, **kwargs):
+        user=get_object_or_404(User, pk=self.request.user.pk)
+        context = super().get_context_data(**kwargs)
+        context.update(self.kwargs)
+        # pk = self.kwargs['place_pk']
+        # p = Places.objects.get(pk=pk)
+        context['title'] = _('edit')+ ' ' + _('place')
+        context['place'] = Places.objects.get(pk=self.kwargs['place_pk'])
+        context['parent_place'] = Place2Place.objects.get(Child = context['place']).Parent
+        context['parent_url'] = context['parent_place'].get_absolute_url()
+        context['submit_button_name'] = _("update") + ' ' + str(context['place'])
+        # context['form'].fields['Type'].queryset = PlaceType.objects.filter(
+        # places_inheritances_Child__Parent__Name = context['parent_place'].Type)
+        # context['form'].fields['Type'].queryset = PlaceType.objects.all().exclude(Name__in = ['jobsite',])
+        ls =[]
+        self.breadcrumb_list(ls, context['parent_place'].pk)
+        _note = _('update place')
+        _note += " "+str(context['place'])
+        ls.append({'Name':_note ,
+            'place_pk': self.kwargs['place_pk'],
+            'url': 'place-update-view',
+            'type' : 'place'})
+        context['breadcrumb'] = ls
+
+        if context['parent_place']:
+            if context['parent_place'].Type.Name == 'jobsite':
+                js = jobsite.objects.get(pk=context['parent_place'].pk)
+                self.author = js.Author
+                if self.author != user:
+                    context['action'] = 'forbidden'
+                    raise Http404 #return context
+                context['jobsite'] =js
+            else:
+                js = Places.objects.get(pk=context['parent_place'].pk).places_place2place_Child.get().jobsite
+                author = js.Author
+                if author != user:
+                    context['action'] = 'forbidden'
+                    raise Http404 #return context
+                context['jobsite'] = js
+
+        logger.info(f'context : {context}')
+        self.context = context
+        return context
+
+    def form_valid(self, form):
+        # self.object = form.save(commit = False)
+        # print('place form DN:', self.object.DesignNumber)
+        # logger.info(f'form placeCreateView: {form}')
+        #collect all DesignNumber to compare
+        # print(self.request)
+        # print('object pk', self.object.pk)
+
+        _r = form.save(commit=True)
+        # print('r:', _r.pk)
+        _mes = gettext_lazy('Place %(p)s updated') % {'p':self.object}
+        messages.info(self.request, _mes)
+
+        self.parent = Place2Place.objects.get(Child = self.object).Parent
+        if self.parent.Type.Name == 'jobsite':
+            self.js = self.parent
+        else:
+            self.js = self.object.places_place2place_Child.get().jobsite
+        # parent_abstract = self.parent.places_place2place_Child.first().ParentAbstract
+        if self.object.Type.Abstract:
+            _filter = {'DesignNumber':self.object.DesignNumber,
+                        'places_place2places_Child__Parent':self.parent,
+                        'Type':self.object.Type,
+                        }
+            if Places.objects.filter(**_filter).exclude(pk = _r.pk).exists():
+                _mes = _('you have place with same Design Number #')
+                _mes +=( f'{self.object.DesignNumber} @{self.parent} -- ')
+                _mes += (f"{', '.join(str(x) for x in Places.objects.filter(**_filter).exclude(pk = _r.pk) )}")
+                messages.info(self.request, _mes)
+        else:
+                #check DesignNumber
+            parent_abstract = Place2Place.objects.get(Child = self.object).ParentAbstract
+            # design_numbers_at_abstract = Places.objects.filter(places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk).values_list('DesignNumber', flat=True)
+            # print(Places.objects.filter(DesignNumber = self.object.DesignNumber).exclude(pk = _r.pk).exists())
+            # print(design_numbers_at_abstract	)
+            _filter = {'DesignNumber':self.object.DesignNumber,
+                        'places_place2places_Child__Parent':parent_abstract,
+                        'Type__Abstract':False,
+                        }
+            if Places.objects.filter(**_filter).exclude(pk = _r.pk).exists():
+                # _existing_place = []
+                # Places.objects.filter(DesignNumber = self.object.DesignNumber, places_place2places_Child__Parent = parent_abstract).exclude(pk = _r.pk):
+                _mes = _('you have place with same Design Nimber #')
+                _mes +=( f'{self.object.DesignNumber} @{parent_abstract} -- ')
+                _mes += (f"{', '.join(str(x) for x in Places.objects.filter(**_filter).exclude(pk = _r.pk) )}")
+                    # _mes += (f'- {x}' for x in _existing_place)
+                messages.info(self.request, _mes)
+                # print('number repeat')
+        # logger.info(f'parent abstract - {parent_abstract}')
+        # self.new_connection_to_place = Place2Place.objects.create(
+        #     Child = self.object,
+        #     Parent = self.parent,
+        #     jobsite = self.js,
+        #     ParentAbstract = parent_abstract,
+        #     )
+        logger.info(f'Update {self.object}')
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class placeDeleteView(LoginRequiredMixin, DeleteView):
     model = Places
     pk_url_kwarg = 'place_pk'
     # form_class = PlacesForm
@@ -324,6 +544,7 @@ class placeDeleteView(LoginRequiredMixin, DeleteView, BreadcrumbMixin):
         self.breadcrumb_list(ls, self.place_pk)
         context['breadcrumb'] = ls
         context['device_list'] = Device.objects.filter(devices_device2places_Device__Parent_id = self.place_pk)
+        context['submit_button_text'] = _("delete") + ' ' + str(self.object)
         logger.info(f'context of placeDeleteView: {context}')
         return context
 
@@ -341,31 +562,36 @@ class placeDeleteView(LoginRequiredMixin, DeleteView, BreadcrumbMixin):
             return reverse('jobsite-list')
 
 
-class JobsiteStructure(base.TemplateView, BreadcrumbMixin):
+class JobsiteStructure(base.TemplateView):
     template_name = 'Places/jobsite_structure.html'
 
     def get_context_data(self, **kwargs):
         context= super().get_context_data(**kwargs)
         js_pk = self.request.GET.get('place', None)
+        _js_str = gettext_lazy('jobsite')
+        _structure = gettext_lazy('structure')
+        context['title'] = format_lazy('{_js_str} {_structure}',_js_str=_js_str, _structure=_structure  )
         #breadcrumb
         l =[]
         d={}
         # d['place_pk'] = js_pk
-        d['Name'] = 'jobsite structure'
+        d['Name'] = context['title']
         # d['url'] ='place-view'
         # d['type'] = 'jobsite'
-        l.insert(0, d)
-        d={}
-        d['place_pk'] = js_pk
-        d['Name'] = jobsite.objects.get(pk=js_pk)#.Name
-        d['url'] ='place-view'
-        d['type'] = 'jobsite'
-        l.insert(0, d)
-        logger.info(f'breadcrumb {l}')
-        context['breadcrumb'] = l
+        # l.insert(0, d)
+        # d={}
+        # d['place_pk'] = js_pk
+        # d['Name'] = jobsite.objects.get(pk=js_pk)#.Name
+        # d['url'] ='place-view'
+        # d['type'] = 'jobsite'
+        # l.insert(0, d)
+        # logger.info(f'breadcrumb {l}')
+        context['breadcrumb'] = breadcrumb_list(self, place_pk = js_pk)
+        context['breadcrumb'].append({'Name': _('Structure')})
         context['jobsite'] = get_object_or_404(jobsite, pk=js_pk)
         # print(context['jobsite'])
-        context['title'] = 'jobsite structure'
+
+
         logger.info(f'{context}')
         # print(context)
         def take_childs(parent):

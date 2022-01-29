@@ -3,6 +3,7 @@ from .import views
 from django.conf import settings
 
 # app_name = 'Places'
+
 urlpatterns = [
     # path('', views.PlacesListView.as_view(), name='Places-list'),
     # path('<int:pk>/', views.PlaceDetailView.as_view(), name ='Place-details'),
@@ -23,6 +24,12 @@ urlpatterns = [
     path('<int:place_pk>/delete/',
         views.placeDeleteView.as_view(),
         name = 'place-delete-view'),
+    path('<int:place_pk>/update/',
+        views.PlaceUpdateView.as_view(),
+        name = 'place-update-view'),
+    path('<int:place_pk>/js-update/',
+        views.JobsiteUpdateView.as_view(),
+        name = 'jobsite-update-view'),
     path('create/',
         views.placeCreateView.as_view(),
         name = 'place-create-view'),

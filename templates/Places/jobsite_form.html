@@ -1,23 +1,56 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
+{% load i18n %}
 
 {% block title %}
-  {{ title }}
+  {% translate title %}
 {% endblock %}
 
 
 {% block content %}
-  <h1>  {{ title }} </h1>
-  <form method="post" class="form-register auth">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">
+        {% translate "create" %} {% translate "jobsite"%} /
+        {#<!-- {% blocktranslate count counter=jobsites|length %}jobsite{% plural %}jobsites{% endblocktranslate %} -->#}
+    </li>
+
+  </ol>
+</nav>
+
+  <!-- <form method="post" class="form-register auth">
     {% csrf_token %}
     {% bootstrap_form form %}
     {% bootstrap_button "create jobsite" button_type="submit" button_class="btn-primary w-100" %}
+  </form> -->
+
+  <!-- create device form -->
+  <!-- <h6 class="mt-4 ">{{title}} {{place}}</h6> -->
+
+  <form method="post" class="form mb-2">
+      {% csrf_token %}
+    {% bootstrap_form form %}
+    <!-- {% translate "update place" as note %} -->
+    {% bootstrap_button submit_button_name button_type="submit" button_class="btn-primary w-100" %}
   </form>
+
+  <a href= {{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
+      {% translate "back to"%} {{parent_place}}</a>
+
+
+
+
 {% endblock %}
 
 
 {% block aside-block %}
-
+<p>
+<!-- {% blocktranslate trimmed %}
+    Create new jobsite here
+{% endblocktranslate %} -->
+</p>
+{% comment %}
   <img src="https://itproger.com/img/courses/1479108898.jpg" class="ímg-thumbnail mt-2">
   <p>"Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. </p>
   <a href="https://itproger.com/course/python" target="_blank">
@@ -29,4 +62,5 @@
   <a href="https://zen.yandex.ru/media/steklo_skazka/vse-znaiut-chto-uggi-izobreli-v-avstralii-no-malo-kto-znaet-pochemu-izza-etogo-ia-by-ne-hotel-tam-jit-604f372a0a7d51654a6c39d9" target="_blank">
     <button class="btn btn-warning">Посмотреть</button>
   </a>
+  {% endcomment %}
 {% endblock %}

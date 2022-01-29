@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="container mb-2">
+  <div class="container mt-2">
+      <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
+          {% translate "add place to"%} {{place}}
+      </a>
+
+      <div class="row mb-2">
+        <div class="col">
+            {% if type == 'jobsite' %}
+                <a type="button" href={% url "jobsite-update-view" place.pk %} class="btn btn-primary col-12">{% translate "edit"%} {% translate "jobsite"%} {{place}}</a>
+            {% else %}
+                <a type="button" href={% url "place-update-view" place.pk %} class="btn btn-primary col-12">{% translate "edit"%} {{place}}</a>
+            {% endif %}
+        </div>
+        <div class="col">
+            <a href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12 {{delete_button}}" role="button" aria-disabled="true">{% translate "delete" %} {{place}}</a>
+          <!-- <a type="button" href={% url "place-delete-view" place.pk %} class="btn btn-primary col-12">delete {{place}}</a> -->
+        </div>
+      </div>
+      <a href={{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
+          {% translate "back to"%} {{back_to_button}}</a>
+  </div>
+</div>

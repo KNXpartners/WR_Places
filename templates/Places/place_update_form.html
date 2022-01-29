@@ -1,0 +1,38 @@
+
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+{% load i18n %}
+{% block title %}
+  {{title}}
+{% endblock %}
+
+
+{% block content %}
+<!-- Places_list.html -->
+
+{% include  'Places/breadcrumb.html'%}
+  <!-- create device form -->
+  <h6 class="mt-4 ">{{title}} {{parent_place}}</h6>
+  
+  <form method="post" class="form mb-2">{% csrf_token %}
+    {% bootstrap_form form %}
+    <!-- {% translate "update place" as note %} -->
+    {% bootstrap_button submit_button_name button_type="submit" button_class="btn-primary w-100" %}
+  </form>
+
+  <a href= {{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
+      {% translate "back to"%} {{parent_place}}</a>
+
+
+
+
+{% endblock content %}
+{% block aside-block %}
+<div class="container ">
+    <span  >{% trans "Existing places at" %} {{parent_place}}</span>
+    {% for p2p in parent_place.places_place2place_Parent.all %}
+        <p class="text-secondary small  mb-0">
+            {{forloop.counter}}. <i>{{p2p.Child}}</i>
+        </p>
+    {% endfor %}</div>
+{% endblock aside-block %}

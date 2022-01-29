@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
+{% load i18n %}
+
 
 
 {% block title %}
@@ -11,7 +13,10 @@
 <!-- breadcrumb -->
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item active" aria-current="page">Jobsites</li>
+    <li class="breadcrumb-item active" aria-current="page">
+        {% translate "jobsite"%}
+        {#<!-- {% blocktranslate count counter=jobsites|length %}jobsite{% plural %}jobsites{% endblocktranslate %} -->#}
+    </li>
 
   </ol>
 </nav>
@@ -89,7 +94,7 @@
 </nav>
 {% endif %}
   <p>
-    <a href="{% url 'create-jobsite' %}" class="btn btn-outline-info mt-2  btn-block">add jobsite</a>
+    <a href="{% url 'create-jobsite' %}" class="btn btn-outline-info mt-2  btn-block">{% translate "add" %} {% translate "jobsite" %}</a>
   </p>
 
   {% endblock %}
