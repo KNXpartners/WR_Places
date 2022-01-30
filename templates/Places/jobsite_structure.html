@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
+{%  load i18n %}
 {% block title %}
   {{title}}
 {% endblock %}
@@ -14,12 +15,17 @@
 {% endblock content %}
 {% block aside-block %}
 <div class="container">
+    <h6>
+        {% translate "statistic"%}
+    </h6>
   <ul class="list-group list-group-flush">
-      <li class="list-group-item">Qty of  places : <i>{{all_places_qty}}</i> </li>
-      <li class="list-group-item">Qty of  abstract places : <i>{{abstract}}</i> </li>
-      <li class="list-group-item">Qty of  not abstract places : <i>{{not_abstract}}</i> </li>
+      <li class="list-group-item">{% trans "places" %} : <i>{{all_places_qty}}</i> </li>
+      <li class="list-group-item">{% trans "abstract" %} {% trans "places" %} : <i>{{abstract}}</i> </li>
+      <li class="list-group-item">{% trans "not" %} {% trans "abstract" %} {% trans "places" %} : <i>{{not_abstract}}</i> </li>
      {% for key, value in statistic.items %}
-    <li class="list-group-item">Qty of  "{{key}}" : <i>{{value}}</i> </li>
+         {% if  value %}
+            <li class="list-group-item">{% translate key %} : <i>{{value}}</i> </li>
+        {% endif %}
     {% endfor%}
   </ul>
 </div>
