@@ -432,7 +432,7 @@ class PlaceUpdateView(LoginRequiredMixin, UpdateView):
     fields = ('Name', 'DesignNumber', 'Description')
     # form_class = PlacesForm
     pk_url_kwarg = 'place_pk'
-    template_name = 'Places\place_update_form.html'
+    template_name = 'Places/place_update_form.html'
 
     def get_context_data(self, **kwargs):
         user=get_object_or_404(User, pk=self.request.user.pk)
