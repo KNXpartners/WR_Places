@@ -67,6 +67,8 @@ class jobsiteCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.Author = self.request.user #fix jobsite to User
         form.instance.Type  = PlaceType.objects.get(pk=1) # fix Place to jobsite type
+        _mes = _('jobsite') + ' ' + str(form.instance) + ' ' + _('created')
+        messages.success(self.request, _mes)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -149,13 +151,20 @@ class JobsiteUpdateView(LoginRequiredMixin, UpdateView):
         context['parent_url'] = self.object.get_absolute_url()
         return context
 
+    # def form_valid(self, form):
+    #     _r = form.save(commit=True)
+    #     # print('r:', _r.pk)
+    #     _mes = gettext_lazy('jobsite %(p)s updated') % {'p':self.object}
+    #     messages.info(self.request, _mes)
+
+        # return HttpResponseRedirect(self.get_success_url())
+
     def form_valid(self, form):
-        _r = form.save(commit=True)
-        # print('r:', _r.pk)
+        # pr('self.obj' + str(self.object), 'debug')
         _mes = gettext_lazy('jobsite %(p)s updated') % {'p':self.object}
         messages.info(self.request, _mes)
 
-        return HttpResponseRedirect(self.get_success_url())
+        return super().form_valid(form)
 
 
 class placeView(LoginRequiredMixin, ListView):
@@ -323,7 +332,7 @@ class placeCreateView(LoginRequiredMixin,CreateView):
         _r = form.save(commit=True)
         # print('r:', _r.pk)
         _mes = gettext_lazy('Place %(p)s created') % {'p':self.object}
-        messages.info(self.request, _mes)
+        messages.success(self.request, _mes)
 
         parent_place_pk = self.request.GET.get('place', None)
         if not parent_place_pk:
@@ -396,7 +405,7 @@ class placeCreateView(LoginRequiredMixin,CreateView):
         #     'type' : 'place'})
         # context['breadcrumb'] = ls
         context['breadcrumb'] = breadcrumb_list(self, place_pk = context['parent_place'].pk)
-        pr(context['breadcrumb'], 'debug')
+        # pr(context['breadcrumb'], 'debug')
         if context['parent_place']:
             if context['parent_place'].Type.Name == 'jobsite':
                 js = jobsite.objects.get(pk=context['parent_place'].pk)
@@ -439,15 +448,17 @@ class PlaceUpdateView(LoginRequiredMixin, UpdateView):
         # context['form'].fields['Type'].queryset = PlaceType.objects.filter(
         # places_inheritances_Child__Parent__Name = context['parent_place'].Type)
         # context['form'].fields['Type'].queryset = PlaceType.objects.all().exclude(Name__in = ['jobsite',])
-        ls =[]
-        self.breadcrumb_list(ls, context['parent_place'].pk)
+        # ls =[]
+        # self.breadcrumb_list(ls, context['parent_place'].pk)
+        context['breadcrumb'] = breadcrumb_list(self, place_pk = context['parent_place'].pk)
         _note = _('update place')
         _note += " "+str(context['place'])
-        ls.append({'Name':_note ,
+        context['breadcrumb'].append({'Name':_note ,
             'place_pk': self.kwargs['place_pk'],
             'url': 'place-update-view',
             'type' : 'place'})
-        context['breadcrumb'] = ls
+        # pr(context['breadcrumb'], 'debug')
+        # context['breadcrumb'] = ls
 
         if context['parent_place']:
             if context['parent_place'].Type.Name == 'jobsite':
@@ -540,9 +551,11 @@ class placeDeleteView(LoginRequiredMixin, DeleteView):
             context['parent'] = None
         else:
             context['parent'] = Place2Place.objects.get(Child__id = self.place_pk).Parent
-        ls =[]
-        self.breadcrumb_list(ls, self.place_pk)
-        context['breadcrumb'] = ls
+        # pr('PArent :' + str(context['parent']),'debug')
+        # ls =[]
+        # self.breadcrumb_list(ls, self.place_pk)
+        # context['breadcrumb'] = ls
+        context['breadcrumb'] = breadcrumb_list(self, self.place_pk)
         context['device_list'] = Device.objects.filter(devices_device2places_Device__Parent_id = self.place_pk)
         context['submit_button_text'] = _("delete") + ' ' + str(self.object)
         logger.info(f'context of placeDeleteView: {context}')
@@ -561,6 +574,20 @@ class placeDeleteView(LoginRequiredMixin, DeleteView):
         else:
             return reverse('jobsite-list')
 
+    def form_valid(self, form):
+        # pr('self.obj' + str(self.object), 'debug')
+        _mes = str(self.object) + ' ' +  _('deleted')
+        messages.info(self.request, _mes)
+
+        return super().form_valid(form)
+
+    # def delete(self, request, *args, **kwargs):
+    #     """Call the delete() method on the fetched object and then redirect to the success URL."""
+    #     self.object = self.get_object()
+    #     success_url = self.get_success_url()
+    #     self.object.delete()
+    #     return HttpResponseRedirect(success_url)
+
 
 class JobsiteStructure(base.TemplateView):
     template_name = 'Places/jobsite_structure.html'
@@ -570,12 +597,13 @@ class JobsiteStructure(base.TemplateView):
         js_pk = self.request.GET.get('place', None)
         _js_str = gettext_lazy('jobsite')
         _structure = gettext_lazy('structure')
-        context['title'] = format_lazy('{_js_str} {_structure}',_js_str=_js_str, _structure=_structure  )
+        # context['title'] = format_lazy('{_js_str} {_structure}',_js_str=_js_str, _structure=_structure  )
+        context['title'] = _('jobsite') + ' ' + _('structure')
         #breadcrumb
-        l =[]
-        d={}
+        # l =[]
+        # d={}
         # d['place_pk'] = js_pk
-        d['Name'] = context['title']
+        # d['Name'] = context['title']
         # d['url'] ='place-view'
         # d['type'] = 'jobsite'
         # l.insert(0, d)

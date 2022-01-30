@@ -10,10 +10,10 @@
 {% block content %}
 <!-- Places_list.html -->
 
-{% include  'Places/breadcrumb.html'%}
+{% include  'breadcrumb.html'%}
   <!-- create device form -->
   <h6 class="mt-4 ">{{title}} {{parent_place}}</h6>
-  
+
   <form method="post" class="form mb-2">{% csrf_token %}
     {% bootstrap_form form %}
     <!-- {% translate "update place" as note %} -->

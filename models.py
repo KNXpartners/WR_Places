@@ -50,7 +50,7 @@ class Places(models.Model):
         # print('Delete child Devices :', device_to_delete)
         #delete palces connected to this place
         places_to_delete = Places.objects.filter(places_place2places_Child__Parent_id=self.pk)
-        print('Delete child palces : ', places_to_delete)
+        # print('Delete child places : ', places_to_delete)
         for p in places_to_delete:
             p.delete()
 
