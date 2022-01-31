@@ -29,10 +29,10 @@
 
       <figure>
         <blockquote class="blockquote">
-          <p><b>{{place}} (<i class="small text-secondary">{{place.Type}}</i>)</b></p>
+          <p><b>{{place}} (<i class="small text-secondary">{% trans place.Type.Name %}</i>)</b></p>
         </blockquote>
         <figcaption class="blockquote-footer">
-          at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i >{{parent.Type}}</i>) </b></a></cite>
+          at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i >{% trans parent.Type.Name %}</i>) </b></a></cite>
         </figcaption>
       </figure>
 
