@@ -230,7 +230,7 @@ class placeView(LoginRequiredMixin, ListView):
                 if _c != 0:
                     context['statistic']['device']['type'][d.Name.lower()] = _c
                 else:
-                    context['statistic']['device']['type'] = None
+                    context['statistic']['device']['type'][d.Name.lower()] = None
             context['title'] = p.Name
             context['parent_url'] = reverse('jobsite-list')
             context['back_to_button'] = _('jobsite list')
