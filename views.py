@@ -134,21 +134,25 @@ class JobsiteUpdateView(LoginRequiredMixin, UpdateView):
     model = jobsite
     pk_url_kwarg = 'place_pk'
     form_class  = jobsiteForm
-    extra_context = {'title': _('edit')+ ' ' + _('jobsite')}
+    # extra_context = {'title': gettext_lazy('edit') + ' ' + gettext_lazy('jobsite')}
 
     def get_context_data(self, **kwargs):
         user=get_object_or_404(User, pk=self.request.user.pk)
         # print('foo = ', self.request.GET.get('foo', None))
         # print('ttype = ', self.request.GET.get('ttype', None))
         context = super().get_context_data(**kwargs)
+        # pr(context, 'debug')
+        # pr(self.kwargs, 'info')
         context.update(self.kwargs)
         # logger.info(f'!!!!!!!!!!  kwargs:{self.kwargs}||| context:{context}' )
         _js_pk = self.kwargs['place_pk']
         _js = Places.objects.get(pk=_js_pk)
+        context['title'] = _('edit') + ' ' + _('jobsite')
         context['type'] = _js.Type.Name
         context['submit_button_name'] = _('update') +' '+_('jobsite')
         context['parent_place'] = str(_js)
         context['parent_url'] = self.object.get_absolute_url()
+        # pr(context, 'debug')
         return context
 
     # def form_valid(self, form):
@@ -444,7 +448,7 @@ class PlaceUpdateView(LoginRequiredMixin, UpdateView):
         context['title'] = _('edit')+ ' ' + _('place')
         context['place'] = Places.objects.get(pk=self.kwargs['place_pk'])
         context['parent_place'] = Place2Place.objects.get(Child = context['place']).Parent
-        context['parent_url'] = context['parent_place'].get_absolute_url()
+        context['parent_url'] = context['place'].get_absolute_url()
         context['submit_button_name'] = _("update") + ' ' + str(context['place'])
         # context['form'].fields['Type'].queryset = PlaceType.objects.filter(
         # places_inheritances_Child__Parent__Name = context['parent_place'].Type)

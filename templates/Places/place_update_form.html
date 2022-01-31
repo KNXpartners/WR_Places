@@ -12,7 +12,7 @@
 
 {% include  'breadcrumb.html'%}
   <!-- create device form -->
-  <h6 class="mt-4 ">{{title}} {{parent_place}}</h6>
+  <h6 class="mt-4 ">{{title}} {{place}}</h6>
 
   <form method="post" class="form mb-2">{% csrf_token %}
     {% bootstrap_form form %}
@@ -21,7 +21,7 @@
   </form>
 
   <a href= {{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
-      {% translate "back to"%} {{parent_place}}</a>
+      {% translate "back to"%} {{place}}</a>
 
 
 
