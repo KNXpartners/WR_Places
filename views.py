@@ -170,6 +170,7 @@ class JobsiteUpdateView(LoginRequiredMixin, UpdateView):
 class placeView(LoginRequiredMixin, ListView):
     context_object_name = 'places'
     paginate_by = 6
+    paginate_orphans = 1
 
     def get_context_data(self, **kwargs):
         user=get_object_or_404(User, pk=self.request.user.pk)
