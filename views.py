@@ -15,7 +15,7 @@ from django.views.generic import (
         DeleteView,
         base
 )
-from django.db.models import F
+from django.db.models import F, Case, Value, When, Count
 from django.http import Http404, HttpResponseNotFound,HttpResponseRedirect
 from Devices.forms import chooseDeviceType
 from Devices.models import Device2Place, DeviceType, Device
@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.utils.text import format_lazy
 from django.contrib import messages
+from django.db.models import F, Q
 # from django.contrib.messages.views import SuccessMessageMixin
 from utils import *
 
@@ -177,14 +178,14 @@ class placeView(LoginRequiredMixin, ListView):
     paginate_orphans = 1
 
     def get_context_data(self, **kwargs):
-        user=get_object_or_404(User, pk=self.request.user.pk)
+        # self.user=get_object_or_404(User, pk=self.request.user.pk)
         # print('foo = ', self.request.GET.get('foo', None))
         # print('ttype = ', self.request.GET.get('ttype', None))
         context = super().get_context_data(**kwargs)
         context.update(self.kwargs)
         logger.info(f'!!!!!!!!!!  kwargs:{self.kwargs}||| context:{context}' )
         pk = self.kwargs['place_pk']
-        p = Places.objects.get(pk=pk)
+        p = Places.objects.select_related('Type').get(pk=pk)
         context['type'] = p.Type.Name
         context['place'] = p
         # context['btn_text'] = 'add place to '
@@ -196,41 +197,52 @@ class placeView(LoginRequiredMixin, ListView):
         ls =[]
         if context['type'] == 'jobsite':
             '''jobsite '''
-            self.author = jobsite.objects.get(pk=pk).Author
+            js = jobsite.objects.select_related('Author').get(pk=pk)
+            self.author = js.Author
             #Places.objects.get(pk=pk).jobsite.Author - variant
-            if self.author != user:
+            if self.author != self.user:
                 context['action'] = 'forbidden'
                 raise Http404 #return context
-            js = jobsite.objects.get(pk=pk)
-            context['jobsite'] =js
+            context['jobsite'] = js
             # self.breadcrumb_list(ls, pk)
             # context['breadcrumb'] = ls
 
             js_pk= pk
             context['statistic'] = {}
             context['statistic']['places'] = {}
-            context['statistic']['places']['abstract'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Abstract = True).count()
-            context['statistic']['places']['not_abstract'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Abstract = False).count()
-            context['statistic']['places']['all_places_qty'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk).count()
+            _places = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk)
+            context['statistic']['places']['abstract'] = _places.filter(Type__Abstract = True).count()
+            context['statistic']['places']['not_abstract'] = _places.filter(Type__Abstract = False).count()
+            context['statistic']['places']['all_places_qty'] = _places.count()
             context['statistic']['places']['type']={}
             for t in PlaceType.objects.all().exclude(Name= 'jobsite'):
-                context['statistic']['places']['type'][t.Name] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Name = t.Name ).count()
+                context['statistic']['places']['type'][t.Name] = _places.filter(Type__Name = t.Name).count()
 
             context['statistic']['wire']={}
             context['statistic']['wire']['WirePurpose']={}
-            for w in WirePurpose.objects.all():
-                context['statistic']['wire']['WirePurpose'][w.Name]= Wire.objects.filter(jobsite_id=js_pk, WirePurpose = w).count()
+            wpc = WirePurpose.objects.annotate(c = Count(Case(When(wires_wires_Type__jobsite_id = js_pk, then=1))))
+            for w in wpc:
+                context['statistic']['wire']['WirePurpose'][w.Name] = w.c
+            # for w in WirePurpose.objects.all():
+            #     context['statistic']['wire']['WirePurpose'][w.Name]= Wire.objects.filter(jobsite_id=js_pk, WirePurpose = w).count()
 
             context['statistic']['device']={}
             context['statistic']['device']['type']={}
             #Translation
 
-            for d in DeviceType.objects.all():
-                _c = Device.objects.filter(Type = d, devices_device2places_Device__jobsite = js).count()
-                if _c != 0:
-                    context['statistic']['device']['type'][d.Name.lower()] = _c
+            dtc = DeviceType.objects.annotate(c = Count(Case(When(devices_devices_Type__devices_device2places_Device__jobsite_id = js_pk, then=1))))
+            for d in dtc:
+                # d.c = Device.objects.filter(Type = d, devices_device2places_Device__jobsite = js).count()
+                if d.c != 0:
+                    context['statistic']['device']['type'][d.Name.lower()] = d.c
                 else:
                     context['statistic']['device']['type'][d.Name.lower()] = None
+            # for d in DeviceType.objects.all():
+            #     _c = Device.objects.filter(Type = d, devices_device2places_Device__jobsite = js).count()
+            #     if _c != 0:
+            #         context['statistic']['device']['type'][d.Name.lower()] = _c
+            #     else:
+            #         context['statistic']['device']['type'][d.Name.lower()] = None
             context['title'] = p.Name
             context['parent_url'] = reverse('jobsite-list')
             context['back_to_button'] = _('jobsite list')
@@ -239,8 +251,10 @@ class placeView(LoginRequiredMixin, ListView):
         else:
             ''' not jobsite, -plain place'''
             js = Places.objects.get(pk=pk).places_place2place_Child.get().jobsite
-            author = jobsite.objects.get(pk=js.pk).Author
-            if author != user:
+            author = js.Author
+
+            # author = jobsite.objects.get(pk=js.pk).Author
+            if author != self.user:
                 context['action'] = 'forbidden'
                 raise Http404 #return context
 
@@ -249,27 +263,30 @@ class placeView(LoginRequiredMixin, ListView):
             context['action'] = context['type'] + ' details'
             context['parent'] = Place2Place.objects.get(Child = p).Parent#doubtful ambiguous
             # query for Devices for this places
-            context['devices'] = Device2Place.objects.select_related('Child').filter(Parent__id = pk)
+            # context['devices'] = Device2Place.objects.filter(Parent__id = pk)
             context['listOfTypes'] = []
             list_of_devices =[]
             context['dev'] ={}
             #collect data for list of devices in this place
             for n in DeviceType.objects.all():
-                print(n, pk)
+                # print(n, pk)
                 # context[n.Name] =[]
                 d = Device.objects.filter(devices_device2places_Device__Parent__id = pk,
-                                        devices_device2places_Device__Child__Type__Name = n.Name).exists()
-                if d:
-                    context['dev'][n.Name] = list(Device.objects.filter(devices_device2places_Device__Parent__id = pk,
-                                            devices_device2places_Device__Child__Type__Name = n.Name).values())
+                                        devices_device2places_Device__Child__Type = n)
+                if d.exists():
+                    context['dev'][n.Name] = list(d.values())
+                    # context['dev'][n.Name] = list(Device.objects.filter(devices_device2places_Device__Parent__id = pk,
+                    #                         devices_device2places_Device__Child__Type__Name = n.Name).values())
                     # print(context['dev'][n.Name])
-                    for ld in context['dev'][n.Name]:
-                        # print ('!!!!!!!!!!!!!!ld', ld)
-                        if 'WireTo_id' in ld and ld['WireTo_id'] :
-                            ld['WireTo_Name'] = Device.objects.get(pk = ld['WireTo_id']).Name
-                            ld['placed_at'] = Device2Place.objects.get(Child__id = ld['id']).Parent.Name
-                if n.Name in context['dev']:
-                    list_of_devices.append(n.Name)
+
+                #     for ld in context['dev'][n.Name]:
+                #         # print ('!!!!!!!!!!!!!!ld', ld)
+                #         if 'WireTo_id' in ld and ld['WireTo_id'] :
+                #             ld['WireTo_Name'] = Device.objects.get(pk = ld['WireTo_id']).Name
+                #             ld['placed_at'] = Device2Place.objects.get(Child__id = ld['id']).Parent.Name
+                # if n.Name in context['dev']:
+                #     list_of_devices.append(n.Name)
+
             # context['listOfDevice'] = list_of_devices
             # print(context['dev'])
             # print('list_of_devices==', list_of_devices)
@@ -300,7 +317,7 @@ class placeView(LoginRequiredMixin, ListView):
         # print(jobsite.objects.filter(Author = user))
         # return Place2Place.objects.all().exclude(Parent = F('Child')).filter(Parent__id = self.kwargs['place_pk'])
 
-        user=get_object_or_404(User, pk=self.request.user.pk)
+        self.user = get_object_or_404(User, pk=self.request.user.pk)
         pk = self.kwargs['place_pk']
         p = Places.objects.get(pk=pk)
         if p.Type.Name == 'jobsite':
@@ -308,8 +325,10 @@ class placeView(LoginRequiredMixin, ListView):
         else:
             js = Places.objects.get(pk=pk).places_place2place_Child.first().jobsite
         author = js.Author
-        logger.warning(f'user= {user}, author = {author}')
-        if author != user:
+        # print(pk, p, js, js.pk)
+        # print(js.Author, self.user)
+        logger.warning(f'user= {self.user}, author = {author}')
+        if author != self.user:
             # return Places.objects.none()
             raise Http404('wrong user for this place')
         return Places.objects.filter(places_place2places_Child__Parent_id = pk)
@@ -643,7 +662,7 @@ class JobsiteStructure(base.TemplateView):
                 return d
         gap = get_all_places(jobsite.objects.get(pk=js_pk))
         logger.info(f'structure dictionary {gap}')
-        context['structure'] = gap
+        # context['structure'] = gap
         def printItems(dictObj, parent, indent, result_str = None):
             if result_str is None:
                 result_str = ''
@@ -673,9 +692,107 @@ class JobsiteStructure(base.TemplateView):
         # logger.info(f'html code: {web1}')
         context['html_code'] = web1
         context['statistic'] = {}
-        context['abstract'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Abstract = True).count()
-        context['not_abstract'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Abstract = False).count()
-        context['all_places_qty'] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk).count()
+        place_all = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk)
+        context['abstract'] = place_all.filter(Type__Abstract = True).count()
+        context['not_abstract'] = place_all.filter(Type__Abstract = False).count()
+        context['all_places_qty'] = place_all.count()
+
         for t in PlaceType.objects.all().exclude(Name= 'jobsite'):
             context['statistic'][t.Name] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Name = t.Name ).count()
         return context
+
+
+def copy_example_js_to_user(request, **kwargs):
+    user = get_object_or_404(User, pk=request.user.pk)
+    js_pk = request.GET.get('js', None)
+    if js_pk is None:
+        raise Http404('no js pk')
+    lang = request.LANGUAGE_CODE
+
+    # print(user, js, lang)
+    # print(reverse('jobsite-list'))
+
+    copy_dict= {}
+    copy_dict['place']= {}
+    copy_dict['device']= {}
+    new_js_pk = ''
+
+    def copy_js(js_pk, user):
+        js = jobsite.objects.get(pk= js_pk)
+        js.id, js.pk = None, None
+        amount = jobsite.objects.filter(Author = user, Name__istartswith = _('example')).count()
+        js.Name = _('example')+ ' ' + _('jobsite' )+ ' #' + str(amount+1)
+        js.Author = user
+        js.save()
+        js_new_pk = js.pk
+        return js_new_pk
+
+    def copy_entry(entry):
+        entry.id, entry.pk = None, None
+        entry.save()
+        return entry.pk
+
+    for p in Places.objects.filter( Q(places_place2places_Parent__jobsite = js_pk) | Q(places_place2places_Child__jobsite = js_pk) ).distinct().reverse():
+        # pr('p_pk :' + str(p.pk)+str(js_pk), 'debug')
+        p_copy = p.pk
+        copy_dict['place'][p_copy] = {}
+        # global new_js_pk
+        if p.pk == int(js_pk):
+            # pr('js_pk!!!!!!!', 'debug')
+            new_js_pk = copy_js(js_pk, user = user)
+            # pr('new_js_pk inside :' + str(new_js_pk), 'debug')
+            copy_dict['place'][p_copy] = new_js_pk
+        else:
+            new_pk = copy_entry(p)
+            copy_dict['place'][p_copy] = new_pk
+
+    # pr('new_js_pk :' + str(new_js_pk), 'debug')
+
+    for p2p in Place2Place.objects.filter(jobsite = js_pk):
+        pr(str(p2p.Child)) 
+        # pr(p2p +' ' +str(p2p.Child) +'  '+ str(p2p.Parent) + ' --- ' + p2p.ParentAbstract, 'info')
+        if p2p.ParentAbstract:
+            ParentAbstract = copy_dict['place'][p2p.ParentAbstract.id]
+        else:
+            ParentAbstract = None
+        pr(ParentAbstract, 'info')
+        new_p2p = Place2Place(
+            Type = p2p.Type,
+            Child_id = copy_dict['place'][p2p.Child.pk], \
+            Parent_id = copy_dict['place'][p2p.Parent.pk],
+            ParentAbstract_id = ParentAbstract,
+            jobsite_id = new_js_pk
+        )
+        new_p2p.save()
+
+    p = Places.objects.filter(places_place2places_Child__jobsite = js_pk).values('id')
+    pr(str(p.count()), 'info')
+    pr('count'+ str(Device.objects.filter(devices_device2places_Device__Parent_id__in = p).count()) + str(Device.objects.filter(devices_device2places_Device__jobsite_id = js_pk).count()), 'debug')
+    for d in Device.objects.filter(devices_device2places_Device__jobsite_id = js_pk):
+        d_copy = d.pk
+        copy_dict['device'][d_copy]= copy_entry(d)
+
+    for d2p in Device2Place.objects.filter(Child__in = Device.objects.filter(devices_device2places_Device__Parent_id__in = p)):
+        # print(d2p.Child.pk,  '  :  ' , copy_dict['device'][d2p.Child.pk])
+        new_d2p = Device2Place(
+                Child_id = copy_dict['device'][d2p.Child.pk],
+                Parent_id=copy_dict['place'][d2p.Parent.pk],
+                jobsite_id = new_js_pk,
+                Type= d2p.Type
+        )
+        new_d2p.save()
+
+    for w in Wire.objects.filter(jobsite = js_pk):
+        new_wire = Wire(Child_id = copy_dict['device'][w.Child.pk], Parent_id = copy_dict['device'][w.Parent.pk], WirePurpose = w.WirePurpose, WireVariant = w.WireVariant, jobsite_id = new_js_pk,
+                       Length= w.Length, SerialNumber= w.SerialNumber)
+        new_wire.save()
+
+
+
+
+
+    return HttpResponseRedirect(reverse('jobsite-list'))
+
+
+def delete_example_js(request, **kwargs):
+    pass

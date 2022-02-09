@@ -36,6 +36,9 @@ urlpatterns = [
     path('create/',
         views.placeCreateView.as_view(),
         name = 'place-create-view'),
+    path('copy-js/',
+        views.copy_example_js_to_user,
+        name = 'copy-js'),
 
     # path('<int:place_pk>/device/',
     #     include ('Devices.urls')),

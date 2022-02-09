@@ -4,6 +4,34 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
+from utils import pr
+from django.dispatch import receiver
+from django.db.models.signals import post_delete, pre_delete
+
+
+
+
+
+
+# @receiver(pre_delete,sender= Places,dispatch_uid = 'delete child places' )
+# def my_callback(sender, **kwargs):
+#     # print("post_delete :", sender, type(kwargs['instance']), kwargs['instance'], kwargs['instance'].pk)
+#     # dev = Device.objects.filter(devices_device2places_Device__Parent = kwargs['instance'])
+#     # dev.delete()
+#     object = kwargs['instance']
+#     # deletable_objects, model_count, protected = get_deleted_objects([object])
+#     # print(deletable_objects, model_count, protected)
+#     if object.Type.Name == 'jobsite':
+#         # print(p)
+#         # print(Device.objects.filter(devices_device2places_Device__Parent_id__in = p).count())
+#         # print(Device.objects.filter(devices_device2places_Device__jobsite = object).count())
+#         p = Places.objects.filter(places_place2places_Child__jobsite = object).values('id')
+#         pr('child places :'+str(p.count()), 'info')
+#         # pr('count parent :'+ str(Device.objects.filter(devices_device2places_Device__Parent_id__in = p).count())+'js:' + str(Device.objects.filter(devices_device2places_Device__jobsite = object).count()), 'debug')
+#
+#         print(p.delete())
+#         # Places.objects.filter(places_place2places_Child__jobsite = object).delete()
+
 
 
 
@@ -20,7 +48,7 @@ class Places(models.Model):
         related_name='%(app_label)s_%(class)s_related',
         related_query_name="%(app_label)s_%(class)ss",
          )
-    Date = models.DateTimeField('Date of creation',  auto_now_add=True,editable = False )
+    Date = models.DateTimeField('Date of creation', auto_now_add=True, editable = False)
     DesignNumber = models.SmallIntegerField(verbose_name = _('number of'),
         help_text = _('..building, stage or flat from jobsite design'),
         default= None, null = True, blank = True,
@@ -44,18 +72,20 @@ class Places(models.Model):
         pk['place_pk'] = self.pk
         return reverse('place-view', kwargs=pk)
 
-    def delete(self, *args, **kwargs):
+    # def delete(self, *args, **kwargs):
         # delete devices in this place
         # device_to_delete = Devices.Device.objects.filter(devices_device2places_Device__Place_id=self.pk)
         # print('Delete child Devices :', device_to_delete)
         #delete palces connected to this place
-        places_to_delete = Places.objects.filter(places_place2places_Child__Parent_id=self.pk)
+        # pr('DELETE : ' + str(self),'info')
+        # pr(Places.objects.filter(places_place2places_Child__Parent_id=self.pk).delete(), 'info')
+        # places_to_delete = Places.objects.filter(places_place2places_Child__Parent_id=self.pk)
         # print('Delete child places : ', places_to_delete)
-        for p in places_to_delete:
-            p.delete()
+        # for p in places_to_delete:
+        #     p.delete()
 
 
-        super().delete(*args, **kwargs)
+        # super().delete(*args, **kwargs)
 
 
 
