@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .import views
 from django.conf import settings
-from django.views.generic import TemplateView
+from Places.views import FirstPageView
 
 # app_name = 'Places'
 
@@ -10,7 +10,11 @@ urlpatterns = [
     # path('<int:pk>/', views.PlaceDetailView.as_view(), name ='Place-details'),
     # path('delete/<int:pk>/', views.PlaceDeleteView.as_view(), name = 'Place-delete'),
     # path('update/<int:pk>/', views.PlaceUpdateView.as_view(), name = 'Place-update'),
-    path('', TemplateView.as_view(template_name="manual/manual.html")),
+    path('', FirstPageView.as_view(template_name="manual/first-page-objectives.html"), name = 'fp-objectives'),
+    path('objectives/', FirstPageView.as_view(template_name="manual/first-page-objectives.html"), name = 'fp-objectives'),
+    path('stages/', FirstPageView.as_view(template_name="manual/first-page-stages.html"), name = 'fp-stages'),
+    path('manual/', FirstPageView.as_view(template_name="manual/manual.html"), name = "fp-manual"),
+    path('feedback/', FirstPageView.as_view(template_name="manual/first-page-feedback.html"), name = "fp-feedback"),
 
     path('jobsitelist/',
     views.jobsiteListView.as_view(),

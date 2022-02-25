@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+from account.models import Account
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
 from utils import pr
 from django.dispatch import receiver
 from django.db.models.signals import post_delete, pre_delete
+from django.conf import settings
 
 
 
@@ -38,7 +39,7 @@ from django.db.models.signals import post_delete, pre_delete
 # Create your models here.
 class Places(models.Model):
     Name = models.CharField(_('Name of the place'), max_length=100, blank=True)
-    Description = models.TextField(_('Description'),blank=True, max_length=100, )
+    Description = models.TextField(_('Description'),blank=True, max_length=500, )
     Type = models.ForeignKey(
         'PlaceType',
         on_delete=models.SET_NULL,
@@ -90,8 +91,9 @@ class Places(models.Model):
 
 
 class jobsite(Places):
-    Author = models.ForeignKey(User,
-    verbose_name='Author',
+    Author = models.ForeignKey(
+    settings.AUTH_USER_MODEL,
+    verbose_name=_('Author'),
     related_name='%(app_label)s_%(class)s_Author',
     related_query_name="%(app_label)s_%(class)ss_Author",
     on_delete=models.CASCADE)

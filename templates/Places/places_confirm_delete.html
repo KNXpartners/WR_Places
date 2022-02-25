@@ -10,11 +10,14 @@
 {% block content %}
 <!-- breadcrumb -->
 {% include  'breadcrumb.html'%}
-
 <div class="container">
+{% if type == 'jobsite' %}
   <h3>{% trans "delete" %} {{object}} </h3>
-  <p>@ {{ parent }}</p>
-
+  <p>@ {{ jobsite.Address }}</p>
+{% else %}
+    <h3>{% trans "delete" %} {{object}} </h3>
+    <p>@ {{ parent }}</p>
+{% endif %}
   <hr>
 
   <div class="container">
@@ -25,8 +28,8 @@
       <li class="list-group-item">{% trans "description" %}: <b>{{ object.Description }}</b></li>
       <li class="list-group-item">{% trans "type" %}: <b>{{ object.Type }}</b></li>
 
-    <form method="post" class="mb-2">{% csrf_token %}
-        <p>{% trans "Are you sure to delete" %} "{{ object.Name }}"?</p>
+    <form method="post" class="my-2">{% csrf_token %}
+        <p class="text-primary">{% trans "Are you sure to delete" %} "{{ object.Name }}"?</p>
         <!-- <input type="submit" value="Confirm"> -->
         {% bootstrap_button submit_button_text button_type="submit" button_class="btn-warning w-100" %}
       </form>
@@ -35,10 +38,8 @@
 
   </div>
 </div>
-
-
-
-
-
-
 {% endblock %}
+
+{% block aside-block %}
+ <!-- right block local -->
+{% endblock aside-block %}

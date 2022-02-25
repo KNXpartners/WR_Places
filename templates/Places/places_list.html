@@ -6,6 +6,11 @@
 {% endblock %}
 
 
+{% block left-sidebar %}
+    {{ block.super}}
+{% endblock left-sidebar %}
+
+
 {% block content %}
 <!-- Places_list.html -->
 
@@ -52,7 +57,7 @@ Abstract: {{place.Type.Abstract}} -->
         <!-- <p class="order-0 p-2" ><p class="align-self-start">details of <b>{{place}}(<i>{{place.Type}}</i>)</b>
             @
             <a href={{parent.get_absolute_url}}><b>{{parent}}(<i>{{parent.Type}}</i>) </b>.</a> -->
-        {# Translators: Time of jobsite creation #}
+        {# Translators: Time of place creation #}
         <p>{% translate "Created at" %}: <i>{{place.Date}}</i></p>
         {% if place.Description %}
             <p>Description: <i>{{place.Description}}</i></p>
@@ -67,14 +72,14 @@ Abstract: {{place.Type.Abstract}} -->
 
                 {% if not place.Type.Abstract %}
                     {% blocktranslate count counter=dev.Device|length %}
-                        <i>{{ counter }} device,</i>
+                        <i>, {{ counter }} device</i>
                     {% plural %}
-                        <i>{{ counter }} devices,</i>
+                        <i>, {{ counter }} devices</i>
                     {% endblocktranslate %}
                     {% blocktranslate count counter=dev.Cabinet|length %}
-                        <i>{{ counter }} cabinet.</i>
+                        <i>, {{ counter }} cabinet.</i>
                     {% plural %}
-                        <i>{{ counter }} cabinets.</i>
+                        <i>, {{ counter }} cabinets.</i>
                     {% endblocktranslate %}
                 {% endif %}
             </p>
@@ -90,7 +95,7 @@ Abstract: {{place.Type.Abstract}} -->
         {% endif %}
         <!-- <p>Here a information about functions in this {{place.Type.Name}} by installer  <b>"{{request.user.username}}"</b>
         </p> -->
-        <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p>
+        <!-- <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p> -->
           <!-- <p class="align-self-start">{{room}} <br> number {{room.rNumber}},  {{room.rType}} , list of functions
             </p> -->
             <!-- <p>{%lorem%}</p> -->
