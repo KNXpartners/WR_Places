@@ -625,6 +625,10 @@ def copy_example_js_to_user(request, **kwargs):
         js_pk = settings.JOBSITE_ID_RU
     elif lang == 'de':
         js_pk = settings.JOBSITE_ID_DE
+    elif lang == 'en':
+        js_pk = settings.JOBSITE_ID_EN
+    else:
+        js_pk = settings.JOBSITE_ID_EN
 
     # print(user, js, lang)
     # print(reverse('jobsite-list'))
