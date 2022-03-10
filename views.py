@@ -43,28 +43,6 @@ logger = logging.getLogger(__name__)
 # print(__name__)
 
 
-# class BreadcrumbMixin:
-#     def breadcrumb_list(self, l, pk):
-#         if jobsite.objects.filter(pk=pk).exists():
-#             d={}
-#             d['place_pk'] =pk
-#             d['Name'] = jobsite.objects.get(pk=pk)#.Name
-#             d['url'] ='place-view'
-#             d['type'] = 'jobsite'
-#             l.insert(0, d)
-#             return l
-#         else:
-#             d={}
-#             d['place_pk'] =pk
-#             d['Name'] = Places.objects.get(pk=pk)#.Name
-#             d['url'] ='place-view'
-#             d['type'] = 'place'
-#             l.insert(0, d)
-#             p = Places.objects.get(pk=pk)
-#             par_pk = Places.objects.get(places_place2places_Parent__Child = p).pk
-#             self.breadcrumb_list(l, par_pk)
-
-
 class jobsiteCreateView(JsDataContextMixin, LoginRequiredMixin, CreateView):
     model = jobsite
     form_class  = jobsiteForm
@@ -174,23 +152,14 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         # pr(self.__dict__, 'info')
         # pr(context, 'debug')
+        # print('context : ' , list(context['places']))
 
         context.update(self.kwargs)
         # pr(context, 'info')
 
         pk = context['place_pk']
 
-        context.update(self.js_data)#!!!!!
-        # pr(self.__dict__, 'info')
-        # pr(context, 'debug')
-
-        # pr(context['jobsite'],'info')
-        # context['left_sidebar'] = self.collect_left_sidebar(context['jobsite'])
-        #check for Author
-        # self.author = context['jobsite'].Author
-        # if self.author != self.user: #self.user from get_queryset
-        #     context['action'] = 'forbidden'
-        #     raise Http404('Wrong user for this place')
+        context.update(self._js_data)#!!!!!
 
         context['child_count'] = Places.objects.filter(places_place2places_Child__Parent_id = pk).count()
         context['device_count'] = Device2Place.objects.filter(Parent_id = pk).count()
@@ -215,9 +184,19 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
             context['back_to_button'] = context['parent']
             ''' not jobsite, - plain place end'''
 
+        if context['place'].Type.Abstract is not True:
+            context['btn_side_menu'] = {
+            1:{
+                'name': _("Add serial sockets to")+' '+str(context['place']), 'url': reverse('serial-socket-create-view')+f'?place={context["place"].pk}&step=1'
+                },
+            2:{
+                'name': _("Add light group to")+' '+str(context['place']), 'url': reverse('light-group-create-view')+f'?place={context["place"].pk}&step=1'
+                }
+            }
+
         context['title'] = context['place'].Name
         context['breadcrumb'] = breadcrumb_list(self, place_pk = pk)
-        # print('context : ' , context)
+        # print('context : ' , context.keys())
         # logger.info(f'This is context {self.cls_name }: {context}')
         # a = {'1':{'1_1':'aa', '1_2':'bb', '1_3':{} }}
         # print(context['left_sidebar'])
@@ -240,7 +219,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         # self.user = get_object_or_404(User, pk=self.request.user.pk)
         # pk = self.kwargs['place_pk']
         # p = Places.objects.get(pk=pk)
-        self.js_data = self.js_data()
+        self._js_data = self.js_data()
         # pr(self.js_data, 'info')
         # self.author = self.js_data['jobsite'].Author
         # # logger.warning(f'user= {self.user}, author = {author}')

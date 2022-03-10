@@ -1,0 +1,25 @@
+{% load i18n %}
+<hr>
+  <div class="container mt-2">
+      <div class="container mt-2">
+        <a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "cabinet" %}</a>
+
+
+        <div class="btn-group mt-2 col-12">
+            <a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary col-11 ">{% translate "create" %} {% translate "device" %}</a>
+
+
+            {% if btn_side_menu %}
+              <button type="button" class="btn btn-outline-primary dropdown-toggle " data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu" >
+                {% for pos in btn_side_menu.values %}
+                    <li><a class="dropdown-item" href="{{pos.url}}" >{{ pos.name }}</a></li>
+                {% endfor %}
+              </ul>
+             {% endif %}
+
+        </div>
+      </div>
+  </div>

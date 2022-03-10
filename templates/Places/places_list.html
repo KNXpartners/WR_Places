@@ -1,24 +1,17 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
 {% load i18n %}
+
 {% block title %}
   {{title}}
 {% endblock %}
-
 
 {% block left-sidebar %}
     {{ block.super}}
 {% endblock left-sidebar %}
 
-
 {% block content %}
 <!-- Places_list.html -->
-
-
-
-
-
-
 
 {% include  'breadcrumb.html'%}
 <!-- <div class="container"><h3>"{{js.Name}}" {{action}}</h3>
@@ -28,6 +21,7 @@
 <!-- jobsite -->
 {% if type == 'jobsite' %}
   {% include 'Places/jobsite.html' %}
+
 <!-- NOT jobsite -->
 {% else %}
   <div class="container mt-1">
@@ -107,10 +101,12 @@ Abstract: {{place.Type.Abstract}} -->
   <!-- places -->
   <!-- <h6>include places</h6> -->
 
- <div class="container">
+  <div class="container">
      <!-- <h6>iclude place(s)</h6> -->
      {% include 'Places/show_places.html' %}<!-- start paginator buttons -->
-     {% include 'Places/paginator.html'%}</div>
+     {% include 'Places/paginator.html'%}
+  </div>
+
   <!-- add place -->
 
     {% include 'Places/add_edit_delete_buttons.html' %}
@@ -119,14 +115,15 @@ Abstract: {{place.Type.Abstract}} -->
 
 <!-- buttons create devices -->
     {% if place.Type.Abstract is not True %}
-    <hr>
+        {% include "Places/create_buttons.html" %}
+    <!-- <hr>
       <div class="container mt-2">
       <div class="container mt-2">
         <a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "cabinet" %}</a>
         <a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "device" %}</a>
       </div>
-      </div>
-      {% endif %}
+      </div> -->
+    {% endif %}
 
 
 
@@ -143,93 +140,93 @@ Abstract: {{place.Type.Abstract}} -->
 
 {% block aside-block %}
 
-{% if type == 'jobsite' %}
-<div class="container small">
-    <h6>
-        {% translate "statistic"%}
-    </h6>
-  <ul class="list-group list-group-flush">
-      <li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i> </li>
-      <li class="list-group-item">{% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.abstract}}</i> </li>
-      <li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i> </li>
-     {% for key, value in statistic.places.type.items %}
-        {% if  value %}
-            <li class="list-group-item">{% translate key %} : <i>{{value}}</i> </li>
+    {% if type == 'jobsite' %}
+    <div class="container small">
+        <h6>
+            {% translate "statistic"%}
+        </h6>
+      <ul class="list-group list-group-flush">
+          <li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i> </li>
+          <li class="list-group-item">{% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.abstract}}</i> </li>
+          <li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i> </li>
+         {% for key, value in statistic.places.type.items %}
+            {% if  value %}
+                <li class="list-group-item">{% translate key %} : <i>{{value}}</i> </li>
+            {% endif %}
+
+        {% endfor%}
+        <span> <hr> </span>
+         {% for key, value in statistic.device.type.items %}
+            {% if  value %}
+                <li class="list-group-item">{% trans key %}: <i>{{value}}</i> </li>
+            {% endif %}
+        {% empty %}
+            {% translate "not" %} {% translate "device"%}
+        {% endfor%}
+        <span> <hr> </span>
+         {% for key, value in statistic.wire.WirePurpose.items %}
+         {% if  value %}
+        <li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i> </li>
         {% endif %}
+        {% endfor%}
 
-    {% endfor%}
-    <span> <hr> </span>
-     {% for key, value in statistic.device.type.items %}
-        {% if  value %}
-            <li class="list-group-item">{% trans key %}: <i>{{value}}</i> </li>
+      </ul>
+    </div>
+    <!-- NOT jobsite -->
+    {% else %}
+
+    <div class="container mt-3">
+
+        {% if dev.items %}
+          <h6 class="mt-2">{% trans "list of devices" %}</h6>
         {% endif %}
-    {% empty %}
-        {% translate "not" %} {% translate "device"%}
-    {% endfor%}
-    <span> <hr> </span>
-     {% for key, value in statistic.wire.WirePurpose.items %}
-     {% if  value %}
-    <li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i> </li>
-    {% endif %}
-    {% endfor%}
-
-  </ul>
-</div>
-<!-- NOT jobsite -->
-{% else %}
-
-<div class="container mt-3">
-
-    {% if dev.items %}
-      <h6 class="mt-2">{% trans "list of devices" %}</h6>
-    {% endif %}
-  <div class="accordion" id="deviceAccordion">
-      {% for key, values in dev.items %}
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+      <div class="accordion" id="deviceAccordion">
+          {% for key, values in dev.items %}
+          <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                  {% if forloop.first %}
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+                      aria-controls="collapse{{ forloop.counter }}">
+                      <!-- {{key}} -->
+                      {% trans key %}
+                  </button>
+                  {% else %}
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                      aria-controls="collapse{{ forloop.counter }}">
+                      <!-- {{key}} -->
+                      {% trans key %}
+                  </button>
+                  {% endif %}
+              </h2>
               {% if forloop.first %}
-              <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
-                  aria-controls="collapse{{ forloop.counter }}">
-                  <!-- {{key}} -->
-                  {% trans key %}
-              </button>
+              <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show "
+                  aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
+                  <div class="accordion-body">
+                      {% for v in values %}
+                      <p><a href="{% url 'dev-details-view'  dev_pk=v.id %}">
+                        {{ v.Name }} </a>
+                        <!-- {{ v.id }} wired from {{ v.WireTo_Name }}@{{v.placed_at|default:'None'}} -->
+                      </p>
+                      {% endfor %}
+                  </div>
+              </div>
               {% else %}
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
-                  aria-controls="collapse{{ forloop.counter }}">
-                  <!-- {{key}} -->
-                  {% trans key %}
-              </button>
+              <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                  aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
+                  <div class="accordion-body">
+                      {% for v in values %}
+                      <p><a href="{% url 'dev-details-view' dev_pk=v.id %}">
+                        {{ v.Name }} </a>
+                      </p>
+                      {% endfor %}
+                  </div>
+              </div>
               {% endif %}
-          </h2>
-          {% if forloop.first %}
-          <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show "
-              aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-              <div class="accordion-body">
-                  {% for v in values %}
-                  <p><a href="{% url 'dev-details-view'  dev_pk=v.id %}">
-                    {{ v.Name }} </a>
-                    <!-- {{ v.id }} wired from {{ v.WireTo_Name }}@{{v.placed_at|default:'None'}} -->
-                  </p>
-                  {% endfor %}
-              </div>
           </div>
-          {% else %}
-          <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
-              aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-              <div class="accordion-body">
-                  {% for v in values %}
-                  <p><a href="{% url 'dev-details-view' dev_pk=v.id %}">
-                    {{ v.Name }} </a>
-                  </p>
-                  {% endfor %}
-              </div>
-          </div>
-          {% endif %}
+          {% endfor %}
       </div>
-      {% endfor %}
-  </div>
-</div>
-{%endif%}
+    </div>
+    {%endif%}
 {% endblock aside-block %}
