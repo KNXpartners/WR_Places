@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Places, jobsite, PlaceType,Place2Place
 from Wires.models import WirePurpose, Wire
-from .forms import PlacesForm, jobsiteForm
+from .forms import PlacesForm, jobsiteForm, WizNormalRoom
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse,reverse_lazy
 from django.core.paginator import Paginator
@@ -13,7 +13,8 @@ from django.views.generic import (
         CreateView,
         UpdateView,
         DeleteView,
-        base
+        base,
+        FormView
 )
 from django.db.models import F, Case, Value, When, Count
 from django.http import Http404, HttpResponseNotFound,HttpResponseRedirect
@@ -160,7 +161,6 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         pk = context['place_pk']
 
         context.update(self._js_data)#!!!!!
-
         context['child_count'] = Places.objects.filter(places_place2places_Child__Parent_id = pk).count()
         context['device_count'] = Device2Place.objects.filter(Parent_id = pk).count()
 
@@ -179,10 +179,25 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
             ''' not jobsite, -plain place'''
             context['action'] = context['type'] + ' details'
             context['parent'] = Place2Place.objects.get(Child = context['place']).Parent #doubtful ambiguous
-            context.update(self.collect_devices(pk))
+            # context.update(self.collect_devices(pk))
+            context.update(self.collect_devices_group_by_line(pk))
+            # new_context = self.collect_devices_group_by_line(pk)
+
             context['parent_url'] = context['parent'].get_absolute_url()
             context['back_to_button'] = context['parent']
             ''' not jobsite, - plain place end'''
+
+        _choices = [(k[0],_(k[1])) for k in PlaceType.objects.filter(places_inheritances_Child__Parent__Name = context['place'].Type).values_list('id', 'Name')]
+
+        if (5, 'room') in _choices and False :
+            context['btn_side_menu'] = {
+            1:{
+                'name': _("Add normal room to")+' '+str(context['place']), 'url': reverse('wizard-normal-room')+f'?place={context["place"].pk}&step=1'
+                },
+            2:{
+                'name': _("Add kitchen to")+' '+str(context['place']), 'url': reverse('light-group-create-view')+f'?place={context["place"].pk}&step=1'
+                }
+            }
 
         if context['place'].Type.Abstract is not True:
             context['btn_side_menu'] = {
@@ -201,6 +216,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         # a = {'1':{'1_1':'aa', '1_2':'bb', '1_3':{} }}
         # print(context['left_sidebar'])
         # print(reverse_lazy('place-view', kwargs={'place_pk' : context['jobsite'].pk}))
+        print(context)
         return context
 
     @property #get class name
@@ -231,7 +247,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         return Places.objects.filter(places_place2places_Child__Parent_id = self.kwargs['place_pk'])
 
 
-class placeCreateView(JsDataContextMixin, LoginRequiredMixin,CreateView):
+class PlaceCreateView(JsDataContextMixin, LoginRequiredMixin,CreateView):
     model = Places
     form_class = PlacesForm
     # success_message = "%(Name)s was created successfully"
@@ -245,7 +261,7 @@ class placeCreateView(JsDataContextMixin, LoginRequiredMixin,CreateView):
     def form_valid(self, form):
         self.object = form.save(commit = False)
         # print('place form DN:', self.object.DesignNumber)
-        # logger.info(f'form placeCreateView: {form}')
+        # logger.info(f'form PlaceCreateView: {form}')
         #collect all DesignNumber to compare
         # print(self.request)
         # print('object pk', self.object.pk)
@@ -307,13 +323,17 @@ class placeCreateView(JsDataContextMixin, LoginRequiredMixin,CreateView):
         user=get_object_or_404(Account, pk=self.request.user.pk)
         context = super().get_context_data(**kwargs)
         context.update(self.kwargs)
+        context.update(self.js_data())
         # pk = self.kwargs['place_pk']
         # p = Places.objects.get(pk=pk)
         context['title'] = _('create place')
-        context['parent_place'] = Places.objects.get(pk=self.request.GET.get('place', None))
+        context['parent_place'] = context['place']
         context['parent_url'] = context['parent_place'].get_absolute_url()
 
         context['form'].fields['Type'].choices = [(k[0],_(k[1])) for k in PlaceType.objects.filter(places_inheritances_Child__Parent__Name = context['parent_place'].Type).values_list('id', 'Name')]
+        # print(f"context choices : {context['form'].fields['Type'].choices}")
+        # print((3, 'outdoor') in context['form'].fields['Type'].choices )
+        # print(type(context['form'].fields['Type'].choices[1]) )
         # context['form'].fields['Type'].queryset = PlaceType.objects.filter(
         # places_inheritances_Child__Parent__Name = context['parent_place'].Type)
 
@@ -326,25 +346,29 @@ class placeCreateView(JsDataContextMixin, LoginRequiredMixin,CreateView):
         #     'type' : 'place'})
         # context['breadcrumb'] = ls
         context['breadcrumb'] = breadcrumb_list(self, place_pk = context['parent_place'].pk)
+
+
+
+
         # pr(context['breadcrumb'], 'debug')
-        if context['parent_place']:
-            if context['parent_place'].Type.Name == 'jobsite':
-                js = jobsite.objects.get(pk=context['parent_place'].pk)
-                self.author = js.Author
-                if self.author != user:
-                    context['action'] = 'forbidden'
-                    raise Http404 #return context
-                context['jobsite'] =js
-            else:
-                js = Places.objects.get(pk=context['parent_place'].pk).places_place2place_Child.get().jobsite
-                author = js.Author
-                if author != user:
-                    context['action'] = 'forbidden'
-                    raise Http404 #return context
-                context['jobsite'] = js
+        # if context['parent_place']:
+        #     if context['parent_place'].Type.Name == 'jobsite':
+        #         js = jobsite.objects.get(pk=context['parent_place'].pk)
+        #         self.author = js.Author
+        #         if self.author != user:
+        #             context['action'] = 'forbidden'
+        #             raise Http404 #return context
+        #         context['jobsite'] =js
+        #     else:
+        #         js = Places.objects.get(pk=context['parent_place'].pk).places_place2place_Child.get().jobsite
+        #         author = js.Author
+        #         if author != user:
+        #             context['action'] = 'forbidden'
+        #             raise Http404 #return context
+        #         context['jobsite'] = js
 
         logger.info(f'context {{self.cls_name}}: {context}')
-        self.context = context
+        # self.context = context
         return context
 
 
@@ -388,7 +412,7 @@ class PlaceUpdateView(JsDataContextMixin, LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         # self.object = form.save(commit = False)
         # print('place form DN:', self.object.DesignNumber)
-        # logger.info(f'form placeCreateView: {form}')
+        # logger.info(f'form PlaceCreateView: {form}')
         #collect all DesignNumber to compare
         # print(self.request)
         # print('object pk', self.object.pk)
@@ -708,3 +732,25 @@ class FirstPageView(JsDataContextMixin, TemplateView):
         if self.extra_context is not None:
             kwargs.update(self.extra_context)
         return kwargs
+
+
+class WizardNormalRoomCreate(JsDataContextMixin, LoginRequiredMixin, FormView):
+    template_name = "Places/wizard_normal_room.html"
+    form_class = WizNormalRoom
+
+    def get_context_data(self, **kwargs):
+        user=get_object_or_404(Account, pk=self.request.user.pk)
+        context = super().get_context_data(**kwargs)
+        context.update(self.kwargs)
+        context.update(self.js_data())
+        context['parent_place'] = context['place']
+        context['parent_url'] = context['parent_place'].get_absolute_url()
+        context['breadcrumb'] = breadcrumb_list(self, place_pk = context['parent_place'].pk)
+        _note = _('create room')
+        context['title'] = _note
+        _note += " @"+str(context['place'])
+        context['breadcrumb'].append({'Name':_note ,
+
+            })
+
+        return context

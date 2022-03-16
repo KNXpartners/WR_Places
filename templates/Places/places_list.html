@@ -185,45 +185,47 @@ Abstract: {{place.Type.Abstract}} -->
           <div class="accordion-item">
               <h2 class="accordion-header" id="heading{{ forloop.counter }}">
                   {% if forloop.first %}
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
-                      aria-controls="collapse{{ forloop.counter }}">
-                      <!-- {{key}} -->
-                      {% trans key %}
-                  </button>
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+                        aria-controls="collapse{{ forloop.counter }}">
+                        <!-- {{key}} -->
+                        {% trans key %}
+                    </button>
                   {% else %}
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
-                      aria-controls="collapse{{ forloop.counter }}">
-                      <!-- {{key}} -->
-                      {% trans key %}
-                  </button>
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                        aria-controls="collapse{{ forloop.counter }}">
+                        <!-- {{key}} -->
+                        {% trans key %}
+                    </button>
                   {% endif %}
               </h2>
-              {% if forloop.first %}
-              <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show "
+
+                <div id="collapse{{ forloop.counter }}"
+                  {% if forloop.first %}
+                    class="accordion-collapse collapse show "
+                  {% else %}
+                    class="accordion-collapse collapse"
+                  {% endif %}
                   aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-                  <div class="accordion-body">
-                      {% for v in values %}
-                      <p><a href="{% url 'dev-details-view'  dev_pk=v.id %}">
-                        {{ v.Name }} </a>
-                        <!-- {{ v.id }} wired from {{ v.WireTo_Name }}@{{v.placed_at|default:'None'}} -->
-                      </p>
-                      {% endfor %}
-                  </div>
-              </div>
-              {% else %}
-              <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
-                  aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-                  <div class="accordion-body">
-                      {% for v in values %}
-                      <p><a href="{% url 'dev-details-view' dev_pk=v.id %}">
-                        {{ v.Name }} </a>
-                      </p>
-                      {% endfor %}
-                  </div>
-              </div>
-              {% endif %}
+                    <div class="accordion-body">
+                        {% for key2, value2 in values.items %}
+
+
+                        <div class="alert alert-light ">
+                        {% for device in value2 %}
+                         <a href="{% url 'dev-details-view'  dev_pk=device.id %}" type="button" class="btn btn-outline-primary mt-1">
+                           {{ device.Name }} </a>
+
+                        {% endfor %}
+                      </div>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+
           </div>
           {% endfor %}
       </div>

@@ -1,9 +1,21 @@
 {% load i18n %}
 <div class="container mb-2">
-  <div class="container mt-2">
-      <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">
+<div class="container mb-2">
+    <div class="btn-group mt-2 col-12">
+      <a type="button" href={% url 'place-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-11">
           {% translate "add place to"%} {{place}}
       </a>
+      {% if btn_side_menu_STOP %}
+        <button type="button" class="btn btn-outline-primary dropdown-toggle mb-2 " data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" >
+          {% for pos in btn_side_menu.values %}
+              <li><a class="dropdown-item" href="{{pos.url}}" >{{ pos.name }}</a></li>
+          {% endfor %}
+        </ul>
+       {% endif %}
+    </div>
 
       <div class="row mb-2">
         <div class="col">
@@ -20,5 +32,5 @@
       </div>
       <a href={{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
           {% translate "back to"%} {{back_to_button}}</a>
-  </div>
+</div>
 </div>
