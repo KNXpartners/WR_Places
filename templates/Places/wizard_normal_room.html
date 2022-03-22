@@ -22,7 +22,7 @@
   <form method="post" class="form mb-2">{% csrf_token %}
     {% bootstrap_form form %}
     {% translate "create new place" as create %}
-    {% bootstrap_button create button_type="submit" button_class="btn-primary w-100" %}
+    {% bootstrap_button submit_button_text button_type="submit" button_class="btn-primary w-100" %}
   </form>
   <a href= {{ parent_url }} class="btn btn-outline-primary mt-2 col-12" role="button" aria-disabled="true">
       {% translate "back to"%} {{parent_place}}</a>
