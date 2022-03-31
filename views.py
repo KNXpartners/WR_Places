@@ -90,6 +90,7 @@ class jobsiteListView(JsDataContextMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['username'] = self.request.user.get_full_name()
         context['left_sidebar'] = self.collect_left_sidebar()
+
         # print(context['username'] )
         return context
 
@@ -150,6 +151,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
     paginate_orphans = 1
 
     def get_context_data(self, **kwargs):
+        pr(f'{self.__class__.__name__} - {sys._getframe().f_code.co_name } - self : {self.__dict__}, kwargs: {kwargs}, GET_len : {len(self.request.GET)}', 'info')
         context = super().get_context_data(**kwargs)
         # pr(self.__dict__, 'info')
         # pr(context, 'debug')
@@ -161,6 +163,8 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         pk = context['place_pk']
 
         context.update(self._js_data)#!!!!!
+        pr(f'context2 : {context}; place ={self.request.GET.get("place", None)}', 'info')
+
         context['child_count'] = Places.objects.filter(places_place2places_Child__Parent_id = pk).count()
         context['device_count'] = Device2Place.objects.filter(Parent_id = pk).count()
 
@@ -180,8 +184,12 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
             context['action'] = context['type'] + ' details'
             context['parent'] = Place2Place.objects.get(Child = context['place']).Parent #doubtful ambiguous
             # context.update(self.collect_devices(pk))
-            context.update(self.collect_devices_group_by_line(pk))
+            context.update(self.collect_devices_group_by_power_line(pk))
             # new_context = self.collect_devices_group_by_line(pk)
+
+            context.update(self.collect_devices(pk))
+            # print(self.collect_devices_group_by_power_line(pk))
+            print('++++++',context['dev'])
 
             context['parent_url'] = context['parent'].get_absolute_url()
             context['back_to_button'] = context['parent']
@@ -216,6 +224,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
         # a = {'1':{'1_1':'aa', '1_2':'bb', '1_3':{} }}
         # print(context['left_sidebar'])
         # print(reverse_lazy('place-view', kwargs={'place_pk' : context['jobsite'].pk}))
+        context['select_menu'] = _('Overview')
         print(context)
         return context
 
@@ -536,7 +545,7 @@ class placeDeleteView(JsDataContextMixin, LoginRequiredMixin, DeleteView):
     #     return HttpResponseRedirect(success_url)
 
 
-class JobsiteStructure(JsDataContextMixin, base.TemplateView):
+class JobsiteStructure(JsDataContextMixin, TemplateView):
     template_name = 'Places/jobsite_structure.html'
 
     def get_context_data(self, **kwargs):
@@ -604,8 +613,11 @@ class JobsiteStructure(JsDataContextMixin, base.TemplateView):
             else:
                 return result_str
             return result_str
+
         web1=printItems(gap,'root', 0)
-        # logger.info(f'html code: {web1}')
+
+        logger.info(f'html code: {web1}')
+
         context['html_code'] = web1
         context['statistic'] = {}
         place_all = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk)
@@ -615,6 +627,8 @@ class JobsiteStructure(JsDataContextMixin, base.TemplateView):
 
         for t in PlaceType.objects.all().exclude(Name= 'jobsite'):
             context['statistic'][t.Name] = Places.objects.filter(places_place2places_Child__jobsite_id=js_pk, Type__Name = t.Name ).count()
+
+        context['select_menu'] = _('Structure')
         return context
 
 

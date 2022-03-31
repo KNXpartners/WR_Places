@@ -56,7 +56,7 @@ Abstract: {{place.Type.Abstract}} -->
         {% if place.Description %}
             <p>Description: <i>{{place.Description}}</i></p>
         {% endif %}
-        {% if places|length > 0 or dev  %}
+        {% if places|length > 0 or dev_stat  %}
             <p>
                 {% blocktranslate count counter=child_count %}
                     Contains: <i>{{ counter }} place, </i>
@@ -65,12 +65,12 @@ Abstract: {{place.Type.Abstract}} -->
                 {% endblocktranslate %}
 
                 {% if not place.Type.Abstract %}
-                    {% blocktranslate count counter=dev.Device|length %}
+                    {% blocktranslate count counter=dev_stat.Device|length %}
                         <i>, {{ counter }} device</i>
                     {% plural %}
                         <i>, {{ counter }} devices</i>
                     {% endblocktranslate %}
-                    {% blocktranslate count counter=dev.Cabinet|length %}
+                    {% blocktranslate count counter=dev_stat.Cabinet|length %}
                         <i>, {{ counter }} cabinet.</i>
                     {% plural %}
                         <i>, {{ counter }} cabinets.</i>
@@ -140,7 +140,7 @@ Abstract: {{place.Type.Abstract}} -->
 
 {% block aside-block %}
 
-    {% if type == 'jobsite' %}
+  {% if type == 'jobsite' %}
     <div class="container small">
         <h6>
             {% translate "statistic"%}
@@ -164,22 +164,29 @@ Abstract: {{place.Type.Abstract}} -->
             {% translate "not" %} {% translate "device"%}
         {% endfor%}
         <span> <hr> </span>
-         {% for key, value in statistic.wire.WirePurpose.items %}
-         {% if  value %}
-        <li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i> </li>
-        {% endif %}
+        {% for key, value in statistic.wire.WirePurpose.items %}
+          {% if  value %}
+            <li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i> </li>
+          {% endif %}
+        {% endfor%}
+        <span> <hr> </span>
+        <li class="list-group-item">{% trans "total cables" %}: <i>{{statistic.wire.total}}</i> </li>
+        {% for key, value in statistic.wire.checked.items %}
+          {% if  value %}
+            <li class="list-group-item">{% trans key %} {% trans "cables" %}: <i>{{value.0}} ({{value.1}}%)</i> </li>
+          {% endif %}
         {% endfor%}
 
       </ul>
     </div>
     <!-- NOT jobsite -->
-    {% else %}
+  {% else %}
 
     <div class="container mt-3">
 
-        {% if dev.items %}
-          <h6 class="mt-2">{% trans "list of devices" %}</h6>
-        {% endif %}
+      {% if dev.items %}
+        <h6 class="mt-2">{% trans "list of devices" %}</h6>
+      {% endif %}
       <div class="accordion" id="deviceAccordion">
           {% for key, values in dev.items %}
           <div class="accordion-item">
@@ -214,6 +221,13 @@ Abstract: {{place.Type.Abstract}} -->
 
                         <div class="alert alert-light ">
                         {% for device in value2 %}
+                        {% if forloop.first %}
+                          {%if key == 'Device'%}
+                            <p class="lh-1">
+                              <a href="{{ key2.get_absolute_url }}" class="small text-reset">{{key2}}</a>
+                            </p>
+                          {% endif %}
+                        {% endif %}
                          <a href="{% url 'dev-details-view'  dev_pk=device.id %}" type="button" class="btn btn-outline-primary mt-1">
                            {{ device.Name }} </a>
 
