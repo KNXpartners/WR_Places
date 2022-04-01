@@ -184,12 +184,13 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
             context['action'] = context['type'] + ' details'
             context['parent'] = Place2Place.objects.get(Child = context['place']).Parent #doubtful ambiguous
             # context.update(self.collect_devices(pk))
-            context.update(self.collect_devices_group_by_power_line(pk))
+            if not context['place'].Type.Abstract:
+                context.update(self.collect_devices_group_by_power_line(pk))
+                print('++++++',context['dev'])
             # new_context = self.collect_devices_group_by_line(pk)
 
             context.update(self.collect_devices(pk))
             # print(self.collect_devices_group_by_power_line(pk))
-            print('++++++',context['dev'])
 
             context['parent_url'] = context['parent'].get_absolute_url()
             context['back_to_button'] = context['parent']
