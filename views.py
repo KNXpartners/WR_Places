@@ -90,6 +90,10 @@ class jobsiteListView(JsDataContextMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['username'] = self.request.user.get_full_name()
         context['left_sidebar'] = self.collect_left_sidebar()
+        context['tasks'] = self.collect_task_for_user()
+
+
+
 
         # print(context['username'] )
         return context

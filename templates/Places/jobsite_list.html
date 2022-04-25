@@ -109,7 +109,45 @@
     <a type="button" href={% url "copy-js"%}?js=95 class="btn btn-primary col-12">{% translate "copy"%} {% trans "example" %} {% translate "jobsite"%}</a>
 
 
-  </div>
+  <p>you have {{tasks|length}} active task(s):</p>
+  {% for task in tasks %}
+  {% if  task.kick.last.implementer_email == request.user.email %}
+      <div class="alert border border-success">
+      {{task.req.object_name}}
+          {% if request.user.email == task.implementer.email %}  {{task.author}}({{task.author.first_name}} {{task.author.last_name}}) {% else %} {{task.implementer}} {% endif %}
+          {{task.kick.last.target.data.reciever.text}} {{task.kick.last.date_created|date:"d M Y" }}
+          <div class="row d-flex justify-content-end">
+            {% for b in task.kick.last.target.data.reciever.buttons  %}
+              <a href="{{b.url}}{{task.id}}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
+                {{b.text}}
+              </a>
+            {% endfor %}
+            <!-- <a href="{% url 'task-resolve' task.id %}?tr=accept&kick={{task.kick.last.pk}}" class="btn btn-outline-success mx-1 col-3">Accept</a>
+            <a href="{% url 'task-resolve' task.id %}?tr=decline" class="btn btn-danger mx-1 col-3">Decline</a> -->
+          </div>
+      </div>
+  {% else %}
+    <div class="alert border border-success">
+
+      {{task.kick.last.target.data.sender.text}} {{task.kick.last.date_created|date:"d M Y" }}
+      {% if task.req %}
+      <p>and create form:
+        <a href="{% url 'customer-req-update' task.req.id %}" class="">{{task.req.object_name}}</a>
+      </p>
+      {% endif %}
+      <div class="row d-flex justify-content-end">
+        {% for b in task.kick.last.target.data.sender.buttons  %}
+
+          <a href="{{b.url}}{{task.id}}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
+            {{b.text}}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% endfor %}
+</div>
   <!-- <img src="https://itproger.com/img/courses/1601651547.jpg" class="ímg-thumbnail mt-2">
   <p>"Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
     aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. </p>
