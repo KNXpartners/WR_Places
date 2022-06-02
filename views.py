@@ -32,6 +32,9 @@ from account.models import Account as User
 from utils.utils import JsDataContextMixin
 from django.views.generic import TemplateView
 from django.conf import settings
+from requirements.models import CustomerRequirements
+from task.views import collect_task_for_user
+
 
 
 
@@ -90,7 +93,11 @@ class jobsiteListView(JsDataContextMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['username'] = self.request.user.get_full_name()
         context['left_sidebar'] = self.collect_left_sidebar()
-        context['tasks'] = self.collect_task_for_user()
+        context['tasks'] = collect_task_for_user(self)
+        print("context['tasks']", context['tasks'])
+        context['requirement'] = CustomerRequirements.objects.order_by('-date_modified').filter(Author = self.request.user)
+        context['html_file'] = "Places/smalls/request.html"
+        print('context[requirement]', context['requirement'])
 
 
 

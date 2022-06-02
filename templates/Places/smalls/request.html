@@ -1,0 +1,15 @@
+{% if task.kick.last.target.name == "request requirement" %}
+you ask {{task.kick.last.implementer_email}} to fill requirements at {{task.kick.last.date_created|date:"d M Y"}}
+{% endif %}
+{% if task.kick.last.target.name == "request for proposal" %}
+you ask {{task.kick.last.implementer_email}} to create proposal for {{task.req.object_name}} at {{task.kick.last.date_created|date:"d M Y"}}
+{% endif %}
+{% if task.kick.last.target.name == "request for project" %}
+you ask {{task.kick.last.implementer_email}} to create project for <strong>{{task.req.object_name}}</strong> at {{task.kick.last.date_created|date:"d M Y"}}
+{% endif %}
+{% if task.kick.last.target.name == "request for proposal and project" %}
+you ask {{task.kick.last.implementer_email}} to create proposal&project for <strong>{{task.req.object_name}}</strong> at {{task.kick.last.date_created|date:"d M Y"}}
+{% endif %}
+{% if not task.kick.all %}
+{{task.id}}
+{% endif %}

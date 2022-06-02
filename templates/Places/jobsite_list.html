@@ -60,45 +60,23 @@
 <div class="container">
     <!-- start paginator buttons -->
     {% include 'paginator.html'%}</div>
-<!-- <nav aria-label="paginationlabel">
-  <ul class="pagination mt-2">
-
-    {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-      </li>
-    {% endif %}
-
-    {% for i in paginator.page_range %}
-      {% if page_obj.number == i %}
-        <li class="page-item active" aria-current="page">
-          <a class="page-link">{{ i }}</a>
-        </li>
-      {% else %}
-        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-      {% endif %}
-    {% endfor %}
-
-
-    {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
-      </li>
-    {% endif %} -->
 
   </ul>
 </nav>
 {% endif %}
   <p>
     <a href="{% url 'create-jobsite' %}" class="btn btn-outline-info mt-2  btn-block w-100">{% translate "add" %} {% translate "jobsite" %}</a>
+  </p>
+
+  <h5> Requirements</h5>
+  {% for req in requirement %}
+  <div class="alert alert-light">
+    <a href="{% url 'customer-req-detail' req.id %}">{{req.object_name}}</a>
+
+  </div>
+  {% endfor %}
+  <p>
+    <a href="{% url 'customer-req-create' %}" class="btn btn-outline-info  btn-block w-100">{% translate "add" %} {% translate "requirements" %}</a>
   </p>
 
   {% endblock %}
@@ -109,9 +87,10 @@
     <a type="button" href={% url "copy-js"%}?js=95 class="btn btn-primary col-12">{% translate "copy"%} {% trans "example" %} {% translate "jobsite"%}</a>
 
 
-  <p>you have {{tasks|length}} active task(s):</p>
+  <p class="mt-2">you have {{tasks|length}} active task{{tasks|length|pluralize}}:</p>
   {% for task in tasks %}
   {% if  task.kick.last.implementer_email == request.user.email %}
+  <!-- task to user -->
       <div class="alert border border-success">
       {{task.req.object_name}}
           {% if request.user.email == task.implementer.email %}  {{task.author}}({{task.author.first_name}} {{task.author.last_name}}) {% else %} {{task.implementer}} {% endif %}
@@ -127,18 +106,20 @@
           </div>
       </div>
   {% else %}
+   {# task from user #}
     <div class="alert border border-success">
+      {#task.kick.last.target.data.sender.text#}
+      {% include 'Places/smalls/request.html' %}
 
-      {{task.kick.last.target.data.sender.text}} {{task.kick.last.date_created|date:"d M Y" }}
       {% if task.req %}
       <p>and create form:
         <a href="{% url 'customer-req-update' task.req.id %}" class="">{{task.req.object_name}}</a>
       </p>
       {% endif %}
+
       <div class="row d-flex justify-content-end">
         {% for b in task.kick.last.target.data.sender.buttons  %}
-
-          <a href="{{b.url}}{{task.id}}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
+          <a href="{% url b.url task.id %}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
             {{b.text}}
           </a>
         {% endfor %}
@@ -162,4 +143,4 @@
   <a href="https://itproger.com/course/python" target="_blank">
     <button class="btn btn-warning">Посмотреть</button>
   </a> -->
-  {% endblock %}
+  {% endblock aside-block %}
