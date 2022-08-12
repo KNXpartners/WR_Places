@@ -92,18 +92,22 @@
   {% if  task.kick.last.implementer_email == request.user.email %}
   <!-- task to user -->
       <div class="alert border border-success">
-      {{task.req.object_name}}
+      {{task.req.object_name}}----
           {% if request.user.email == task.implementer.email %}  {{task.author}}({{task.author.first_name}} {{task.author.last_name}}) {% else %} {{task.implementer}} {% endif %}
           {{task.kick.last.target.data.reciever.text}} {{task.kick.last.date_created|date:"d M Y" }}
+        {% comment %}
           <div class="row d-flex justify-content-end">
             {% for b in task.kick.last.target.data.reciever.buttons  %}
-              <a href="{{b.url}}{{task.id}}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
+              <a href=""  class="{{b.class}}">
+                {{b.url}} uuid:{{task.id}}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}
                 {{b.text}}
               </a>
             {% endfor %}
             <!-- <a href="{% url 'task-resolve' task.id %}?tr=accept&kick={{task.kick.last.pk}}" class="btn btn-outline-success mx-1 col-3">Accept</a>
             <a href="{% url 'task-resolve' task.id %}?tr=decline" class="btn btn-danger mx-1 col-3">Decline</a> -->
           </div>
+        {% endcomment %}
+
       </div>
   {% else %}
    {# task from user #}
@@ -116,14 +120,16 @@
         <a href="{% url 'customer-req-update' task.req.id %}" class="">{{task.req.object_name}}</a>
       </p>
       {% endif %}
-
-      <div class="row d-flex justify-content-end">
-        {% for b in task.kick.last.target.data.sender.buttons  %}
-          <a href="{% url b.url task.id %}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}"class="{{b.class}}">
-            {{b.text}}
-          </a>
-        {% endfor %}
-      </div>
+      {% comment %}
+        <div class="row d-flex justify-content-end">
+          {% for b in task.kick.last.target.data.sender.buttons  %}
+            <a href=""class="{{b.class}}">
+              {{ b.url}} {{ task.id }}?{% for k,v in b.url_param.items %}{% if k == 'kick' %}&kick={{task.kick.last.pk}}{%else%}&{{k}}={{v}}{%endif%}{% endfor %}
+              {{b.text}}
+            </a>
+          {% endfor %}
+        </div>
+      {% endcomment %}
     </div>
   {% endif %}
 
