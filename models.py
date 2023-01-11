@@ -112,7 +112,7 @@ class jobsite(Places):
 class PlaceType(models.Model):
     Name = models.CharField(verbose_name=_('name'), max_length=50, unique = True)
     Abstract = models.BooleanField(default = True)
-    Short =models.CharField(max_length = 3)
+    Short = models.CharField(max_length = 3)
     # View_name = models.CharField(max_length = 100, blank=True, default ='/')
 
     class Meta:

@@ -57,7 +57,7 @@ class jobsiteCreateView(JsDataContextMixin, LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.Author = self.request.user #fix jobsite to User
-        form.instance.Type  = PlaceType.objects.get(pk=1) # fix Place to jobsite type
+        form.instance.Type  = PlaceType.objects.get(Name = 'jobsite') # fix Place to jobsite type
         _mes = _('jobsite') + ' ' + str(form.instance) + ' ' + _('created')
         messages.success(self.request, _mes)
         return super().form_valid(form)
