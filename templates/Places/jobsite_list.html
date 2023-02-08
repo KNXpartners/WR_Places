@@ -5,65 +5,63 @@
 
 
 {% block title %}
-{{title}}
+  {{title}}
 {% endblock %}
 
 
 {% block content %}
-<!-- breadcrumb -->
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item active" aria-current="page">
-        {% translate "jobsite"%}
-        {#<!-- {% blocktranslate count counter=jobsites|length %}jobsite{% plural %}jobsites{% endblocktranslate %} -->#}
-    </li>
-
-  </ol>
-</nav>
-
-{% for jobsite in jobsites %}
-<div class="alert alert-light">
-  <h1>{{ jobsite.Name }}</h1>
-  <p>{{ jobsite.Description|striptags|truncatechars:200 }}</p>
-  <div class="d-flex">
-    <div>
-      <img src="{{ jobsite.Author.img.url }}" alt="{{ jobsite.Author }}" class="user_images">
-    </div>
-    <div class="mt-2">
-      <span class="text-muted">{% trans "Started at" %}: {{ jobsite.Date|date:"d E Y в H:i" }}</span>
-      <p><b>{% trans "Installer" %}:</b> <a href="#">{{ jobsite.Author.get_full_name }}</a></p>
-    </div>
-  </div>
-
-
-  <div class="btn-group">
-    <a href="{% url 'place-view' jobsite.id %}" type="button" class="btn btn-warning">{% trans "Choose" %} {% trans "jobsite" %} {{jobsite.Name}}</a>
-    <!-- <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
-      aria-expanded="false">
-      <span class="visually-hidden">Toggle Dropdown</span>
-    </button>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="#">Edit project</a></li>
-      <li><a class="dropdown-item" href="#">Arhive project</a></li>
-      <li>
-        <hr class="dropdown-divider">
+  <!-- breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active" aria-current="page">
+          {% translate "jobsite"%}
+          {#<!-- {% blocktranslate count counter=jobsites|length %}jobsite{% plural %}jobsites{% endblocktranslate %} -->#}
       </li>
-      <li><a class="dropdown-item" href="#">Project status</a></li>
-    </ul> -->
-  </div>
-</div>
-{% empty %}
-<div class="container"> {% trans "no jobsite yet.." %}</div>
-{% endfor %}
 
-{% if is_paginated %}
-<div class="container">
-    <!-- start paginator buttons -->
-    {% include 'paginator.html'%}</div>
+    </ol>
+  </nav>
 
-  </ul>
-</nav>
-{% endif %}
+  {% for jobsite in jobsites %}
+    <div class="alert alert-light">
+      <h1>{{ jobsite.Name }}</h1>
+      <p>{{ jobsite.Description|striptags|truncatechars:200 }}</p>
+      <div class="d-flex">
+        <div>
+          <img src="{{ jobsite.Author.img.url }}" alt="{{ jobsite.Author }}" class="user_images">
+        </div>
+        <div class="mt-2">
+          <span class="text-muted">{% trans "Started at" %}: {{ jobsite.Date|date:"d E Y в H:i" }}</span>
+          <p><b>{% trans "Installer" %}:</b> <a href="#">{{ jobsite.Author.get_full_name }}</a></p>
+        </div>
+      </div>
+      <div class="btn-group">
+        <a href="{% url 'place-view' jobsite.id %}" type="button" class="btn btn-warning">{% trans "Choose" %} {% trans "jobsite" %} {{jobsite.Name}}</a>
+        <!-- <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">Edit project</a></li>
+          <li><a class="dropdown-item" href="#">Arhive project</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" href="#">Project status</a></li>
+        </ul> -->
+      </div>
+    </div>
+  {% empty %}
+    <div class="container"> {% trans "no jobsite yet.." %}</div>
+  {% endfor %}
+
+  {% if is_paginated %}
+    <div class="container">
+        <!-- start paginator buttons -->
+        {% include 'paginator.html'%}</div>
+
+      </ul>
+    </nav>
+  {% endif %}
   <p>
     <a href="{% url 'create-jobsite' %}" class="btn btn-outline-info mt-2  btn-block w-100">{% translate "add" %} {% translate "jobsite" %}</a>
   </p>
@@ -78,11 +76,14 @@
   <p>
     <a href="{% url 'customer-req-create' %}" class="btn btn-outline-info  btn-block w-100">{% translate "add" %} {% translate "requirements" %}</a>
   </p>
+  <p>
+    <a href="{% url 'customer-req-neway-create' %}" class="btn btn-outline-info  btn-block w-100">{% translate "add" %} {% translate "requirements" %} {% translate "new" %}</a>
+  </p>
 
-  {% endblock %}
+{% endblock content %}
 
 
-  {% block aside-block %}
+{% block aside-block %}
   <div class="container">
     <a type="button" href={% url "copy-js"%}?js=95 class="btn btn-primary col-12">{% translate "copy"%} {% trans "example" %} {% translate "jobsite"%}</a>
 
@@ -149,4 +150,4 @@
   <a href="https://itproger.com/course/python" target="_blank">
     <button class="btn btn-warning">Посмотреть</button>
   </a> -->
-  {% endblock aside-block %}
+{% endblock aside-block %}
