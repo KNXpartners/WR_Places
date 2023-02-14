@@ -3,11 +3,11 @@
 {% load i18n %}
 
 {% block title %}
-  {{title}}
+{{title}}
 {% endblock %}
 
 {% block left-sidebar %}
-    {{ block.super}}
+{{ block.super}}
 {% endblock left-sidebar %}
 
 {% block content %}
@@ -20,119 +20,112 @@
 </div> -->
 <!-- jobsite -->
 {% if type == 'jobsite' %}
-  {% include 'Places/jobsite.html' %}
+{% include 'Places/jobsite.html' %}
 
 <!-- NOT jobsite -->
 {% else %}
-  <div class="container mt-1">
+<div class="container mt-1">
 
-      <figure>
-        <blockquote class="blockquote">
-          <p><b>{{place}} (<i class="small text-secondary">{% trans place.Type.Name %}</i>)</b></p>
-        </blockquote>
-        <figcaption class="blockquote-footer">
-          at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i >{% trans parent.Type.Name %}</i>) </b></a></cite>
-        </figcaption>
-      </figure>
+	<figure>
+		<blockquote class="blockquote">
+			<p><b>{{place}} (<i class="small text-secondary">{% trans place.Type.Name %}</i>)</b></p>
+		</blockquote>
+		<figcaption class="blockquote-footer">
+			at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i>{{ parent.Type.Name }}</i>) </b></a></cite>
+		</figcaption>
+	</figure>
 
 
-      <!-- {% for message in messages %}
-        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" >
-            {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"> </button>
-        </div>
-      {% endfor %} -->
-<!-- {{dev}} <br>
-{{dev.Device}} <br>
-{{dev.Cabinet}} <br>
-Abstract: {{place.Type.Abstract}} -->
+	<!-- {% for message in messages %}
+		<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" >
+				{{ message }}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"> </button>
+		</div>
+	{% endfor %} -->
+	<!-- {{dev}} <br>
+	{{dev.Device}} <br>
+	{{dev.Cabinet}} <br>
+	Abstract: {{place.Type.Abstract}} -->
 
-    <div class="d-flex flex-column align-items-start ">
-        <!-- <p class="order-0 p-2" ><p class="align-self-start">details of <b>{{place}}(<i>{{place.Type}}</i>)</b>
-            @
-            <a href={{parent.get_absolute_url}}><b>{{parent}}(<i>{{parent.Type}}</i>) </b>.</a> -->
-        {# Translators: Time of place creation #}
-        <p>{% translate "Created at" %}: <i>{{place.Date}}</i></p>
-        {% if place.Description %}
-            <p>Description: <i>{{place.Description}}</i></p>
-        {% endif %}
-        {% if places|length > 0 or dev_stat  %}
-            <p>
-                {% blocktranslate count counter=child_count %}
-                    Contains: <i>{{ counter }} place, </i>
-                {% plural %}
-                    Contains: <i>{{ counter }} places, </i>
-                {% endblocktranslate %}
+	<div class="d-flex flex-column align-items-start ">
+		<!-- <p class="order-0 p-2" ><p class="align-self-start">details of <b>{{place}}(<i>{{place.Type}}</i>)</b>
+				@
+				<a href={{parent.get_absolute_url}}><b>{{parent}}(<i>{{parent.Type}}</i>) </b>.</a> -->
+		{# Translators: Time of place creation #}
+		<p>{% translate "Created at" %}: <i>{{place.Date|date:"D d M Y"}}</i></p>
+		{% if place.Description %}
+		<p>Description: <i>{{place.Description}}</i></p>
+		{% endif %}
+		{% if places|length > 0 or dev_stat %}
+		<p>
+			{% blocktranslate count counter=child_count %}
+			Contains: <i>{{ counter }} place, </i>
+			{% plural %}
+			Contains: <i>{{ counter }} places, </i>
+			{% endblocktranslate %}
 
-                {% if not place.Type.Abstract %}
-                    {% blocktranslate count counter=dev_stat.Device|length %}
-                        <i>, {{ counter }} device</i>
-                    {% plural %}
-                        <i>, {{ counter }} devices</i>
-                    {% endblocktranslate %}
-                    {% blocktranslate count counter=dev_stat.Cabinet|length %}
-                        <i>, {{ counter }} cabinet.</i>
-                    {% plural %}
-                        <i>, {{ counter }} cabinets.</i>
-                    {% endblocktranslate %}
-                {% endif %}
-            </p>
-            <!-- <p>Contains: <i>{{child_count}} place{{places|pluralize}}
-            {% if not place.Type.Abstract %}
-                , {{dev.Device|length}} device{{dev.Device|pluralize}}, {{dev.Cabinet|length}} cabinet{{dev.Cabinet|pluralize}}</i>
-            {%endif%}
-            </p> -->
-        {% else %}
-            {% blocktranslate %}
-                <p>No places in <i> {{place}} </i> yet</p>
-            {% endblocktranslate %}
-        {% endif %}
-        <!-- <p>Here a information about functions in this {{place.Type.Name}} by installer  <b>"{{request.user.username}}"</b>
-        </p> -->
-        <!-- <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p> -->
-          <!-- <p class="align-self-start">{{room}} <br> number {{room.rNumber}},  {{room.rType}} , list of functions
-            </p> -->
-            <!-- <p>{%lorem%}</p> -->
-    </div>
-    <!-- <p class="align-self-end" style="font-size: 10px">request.path_info= <i>"{{request.path_info}}"</i>
-    </p> -->
-  </div>
-  <hr>
-  <!-- places -->
-  <!-- <h6>include places</h6> -->
+			{% if not place.Type.Abstract %}
+			{% blocktranslate count counter=dev_stat.Device|length %}
+			<i>, {{ counter }} device</i>
+			{% plural %}
+			<i>, {{ counter }} devices</i>
+			{% endblocktranslate %}
+			{% blocktranslate count counter=dev_stat.Cabinet|length %}
+			<i>, {{ counter }} cabinet.</i>
+			{% plural %}
+			<i>, {{ counter }} cabinets.</i>
+			{% endblocktranslate %}
+			{% endif %}
+		</p>
+		<!-- <p>Contains: <i>{{child_count}} place{{places|pluralize}}
+		{% if not place.Type.Abstract %}
+				, {{dev.Device|length}} device{{dev.Device|pluralize}}, {{dev.Cabinet|length}} cabinet{{dev.Cabinet|pluralize}}</i>
+		{%endif%}
+		</p> -->
+		{% else %}
+		{% blocktranslate %}
+		<p>No places in <i> {{place}} </i> yet</p>
+		{% endblocktranslate %}
+		{% endif %}
+		<!-- <p>Here a information about functions in this {{place.Type.Name}} by installer  <b>"{{request.user.username}}"</b>
+		</p> -->
+		<!-- <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p> -->
+		<!-- <p class="align-self-start">{{room}} <br> number {{room.rNumber}},  {{room.rType}} , list of functions
+			</p> -->
+		<!-- <p>{%lorem%}</p> -->
+	</div>
+	<!-- <p class="align-self-end" style="font-size: 10px">request.path_info= <i>"{{request.path_info}}"</i>
+	</p> -->
+</div>
+<hr>
+<!-- places -->
+<!-- <h6>include places</h6> -->
 
-  <div class="container">
-     <!-- <h6>iclude place(s)</h6> -->
-     {% include 'Places/show_places.html' %}<!-- start paginator buttons -->
-     {% include 'Places/paginator.html'%}
-  </div>
+<div class="container">
+	<!-- <h6>iclude place(s)</h6> -->
+	{% include 'Places/show_places.html' %}<!-- start paginator buttons -->
+	{% include 'Places/paginator.html'%}
+</div>
 
-  <!-- add place -->
+<!-- add place -->
 
-    {% include 'Places/add_edit_delete_buttons.html' %}
-
+{% include 'Places/add_edit_delete_buttons.html' %}
 
 
 <!-- buttons create devices -->
-    {% if place.Type.Abstract is not True %}
-        {% include "Places/create_buttons.html" %}
-    <!-- <hr>
-      <div class="container mt-2">
-      <div class="container mt-2">
-        <a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "cabinet" %}</a>
-        <a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "device" %}</a>
-      </div>
-      </div> -->
-    {% endif %}
-
-
-
-
+{% if place.Type.Abstract is not True %}
+{% include "Places/create_buttons.html" %}
+<!-- <hr>
+	<div class="container mt-2">
+	<div class="container mt-2">
+		<a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "cabinet" %}</a>
+		<a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "device" %}</a>
+	</div>
+	</div> -->
 {% endif %}
 
 
-
-
+{% endif %}
 
 
 {% endblock content %}
@@ -140,109 +133,103 @@ Abstract: {{place.Type.Abstract}} -->
 
 {% block aside-block %}
 
-  {% if type == 'jobsite' %}
-    <div class="container small">
-        <h6>
-            {% translate "statistic"%}
-        </h6>
-      <ul class="list-group list-group-flush">
-          <li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i> </li>
-          <li class="list-group-item">{% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.abstract}}</i> </li>
-          <li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i> </li>
-         {% for key, value in statistic.places.type.items %}
-            {% if  value %}
-                <li class="list-group-item">{% translate key %} : <i>{{value}}</i> </li>
-            {% endif %}
+{% if type == 'jobsite' %}
+<div class="container small">
+	<h6>
+		{% translate "statistic"%}
+	</h6>
+	<ul class="list-group list-group-flush">
+		<li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i></li>
+		<li class="list-group-item">{% translate "abstract" %} {% translate "places" %} :
+			<i>{{statistic.places.abstract}}</i></li>
+		<li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i>
+		</li>
+		{% for key, value in statistic.places.type.items %}
+		{% if value %}
+		<li class="list-group-item">{% translate key %} : <i>{{value}}</i></li>
+		{% endif %}
 
-        {% endfor%}
-        <span> <hr> </span>
-         {% for key, value in statistic.device.type.items %}
-            {% if  value %}
-                <li class="list-group-item">{% trans key %}: <i>{{value}}</i> </li>
-            {% endif %}
-        {% empty %}
-            {% translate "not" %} {% translate "device"%}
-        {% endfor%}
-        <span> <hr> </span>
-        {% for key, value in statistic.wire.WirePurpose.items %}
-          {% if  value %}
-            <li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i> </li>
-          {% endif %}
-        {% endfor%}
-        <span> <hr> </span>
-        <li class="list-group-item">{% trans "total cables" %}: <i>{{statistic.wire.total}}</i> </li>
-        {% for key, value in statistic.wire.checked.items %}
-          {% if  value %}
-            <li class="list-group-item">{% trans key %} {% trans "cables" %}: <i>{{value.0}} ({{value.1}}%)</i> </li>
-          {% endif %}
-        {% endfor%}
+		{% endfor%}
+		<span> <hr> </span>
+		{% for key, value in statistic.device.type.items %}
+		{% if value %}
+		<li class="list-group-item">{% trans key %}: <i>{{value}}</i></li>
+		{% endif %}
+		{% empty %}
+		{% translate "not" %} {% translate "device"%}
+		{% endfor%}
+		<span> <hr> </span>
+		{% for key, value in statistic.wire.WirePurpose.items %}
+		{% if value %}
+		<li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i></li>
+		{% endif %}
+		{% endfor%}
+		<span> <hr> </span>
+		<li class="list-group-item">{% trans "total cables" %}: <i>{{statistic.wire.total}}</i></li>
+		{% for key, value in statistic.wire.checked.items %}
+		{% if value %}
+		<li class="list-group-item">{% trans key %} {% trans "cables" %}: <i>{{value.0}} ({{value.1}}%)</i></li>
+		{% endif %}
+		{% endfor%}
 
-      </ul>
-    </div>
-    <!-- NOT jobsite -->
-  {% else %}
+	</ul>
+</div>
+<!-- NOT jobsite -->
+{% else %}
+ 	<div class="container mt-3">
+		{% if dev.items %}
+		<div class="accordion" id="deviceAccordion">
+			{% for key, devices_qs in dev.items %}
+				{% if devices_qs is not None %}
+					<div class="accordion-item">
+					<h2 class="accordion-header" id="heading{{ forloop.counter }}">
+					{% if forloop.first %}
+					<button class="accordion-button" type="button" data-bs-toggle="collapse"
+					        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+					        aria-controls="collapse{{ forloop.counter }}">
+						 {{key}}
+<!--						{% trans key %}-->
+					</button>
+					{% else %}
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+					        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+					        aria-controls="collapse{{ forloop.counter }}">
+						 {{key}}
+<!--						{% trans key %}-->
+					</button>
+					{% endif %}
+				</h2>
 
-    <div class="container mt-3">
-
-      {% if dev.items %}
-        <h6 class="mt-2">{% trans "list of devices" %}</h6>
-      {% endif %}
-      <div class="accordion" id="deviceAccordion">
-          {% for key, values in dev.items %}
-          <div class="accordion-item">
-              <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                  {% if forloop.first %}
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
-                        aria-controls="collapse{{ forloop.counter }}">
-                        <!-- {{key}} -->
-                        {% trans key %}
-                    </button>
-                  {% else %}
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
-                        aria-controls="collapse{{ forloop.counter }}">
-                        <!-- {{key}} -->
-                        {% trans key %}
-                    </button>
-                  {% endif %}
-              </h2>
-
-                <div id="collapse{{ forloop.counter }}"
-                  {% if forloop.first %}
-                    class="accordion-collapse collapse show "
-                  {% else %}
-                    class="accordion-collapse collapse"
-                  {% endif %}
-                  aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-                    <div class="accordion-body">
-                        {% for key2, value2 in values.items %}
-
-
-                        <div class="alert alert-light ">
-                        {% for device in value2 %}
-                        {% if forloop.first %}
-                          {%if key == 'Device'%}
-                            <p class="lh-1">
-                              <a href="{{ key2.get_absolute_url }}" class="small text-reset">{{key2}}</a>
-                            </p>
-                          {% endif %}
-                        {% endif %}
-                         <a href="{% url 'dev-details-view'  dev_pk=device.id %}" type="button" class="btn btn-outline-primary mt-1">
-                           {{ device.Name }} </a>
-
-                        {% endfor %}
-                      </div>
-
-                        {% endfor %}
-
-                    </div>
-                </div>
+				<div id="collapse{{ forloop.counter }}"
+				     {% if forloop.first %}
+				     class="accordion-collapse collapse show "
+				     {% else %}
+				     class="accordion-collapse collapse"
+				     {% endif %}
+				     aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
+					<div class="accordion-body">
+						{% for dev in devices_qs %}
+							<div class="alert alert-light ">
+								<div> group of	<strong>{{ dev.GroupType }}</strong> ({{dev.QntyMembers}} devices)</div>
+								<a href="{% url 'dev-details-view'  dev_pk=dev.id %}" type="button" class="btn btn-outline-primary mt-1">
+									{{ dev.Name }}
+								</a>
+								{% if key == 'Device' %}
+									<p class="lh-1">
+										<a href="{{ dev.wires_wire_Child.last.get_absolute_url }}" class="small ">{{dev.wires_wire_Child.last}}</a>
+									</p>
+								{% endif %}
+							</div>
+						{% endfor %}
+					</div>
+				</div>
 
 
-          </div>
-          {% endfor %}
-      </div>
-    </div>
-    {%endif%}
+			</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+{%endif%}
 {% endblock aside-block %}
