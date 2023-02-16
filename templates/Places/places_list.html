@@ -176,7 +176,7 @@
 </div>
 <!-- NOT jobsite -->
 {% else %}
-	{{dev_grp}}
+{#	{{dev_grp}}#}
  	<div class="container mt-3">
 		{% if dev_grp.items %}
 		<div class="accordion" id="deviceAccordion">
@@ -209,15 +209,15 @@
 				     {% endif %}
 				     aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
 					<div class="accordion-body">
-						{% for dev in devices_qs %}
+						{% for grp in devices_qs %}
 							<div class="alert alert-light ">
-								<div> group of	<strong>{{ dev.GroupType }}</strong> ({{dev.QntyMembers}} devices)</div>
-								<a href="{% url 'dev-details-view'  dev_pk=dev.id %}" type="button" class="btn btn-outline-primary mt-1">
-									{{ dev.Name }}
+								<div> group of	<strong>{{ grp.GroupType }}</strong> ({{grp.QntyMembers}} devices)</div>
+								<a href="{% url 'dev-details-view'  dev_pk=grp.id %}" type="button" class="btn btn-outline-primary mt-1">
+									{{ grp.GroupName }}
 								</a>
 								{% if key == 'Device' %}
 									<p class="lh-1">
-										<a href="{{ dev.wires_wire_Child.last.get_absolute_url }}" class="small ">{{dev.wires_wire_Child.last}}</a>
+										<a href="{{ grp.wires_wire_Child.last.get_absolute_url }}" class="small ">{{grp.wires_wire_Child.last}}</a>
 									</p>
 								{% endif %}
 							</div>
