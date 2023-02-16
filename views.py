@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from icecream import ic
+
 from .models import Places, jobsite, PlaceType, Place2Place
 from Wires.models import WirePurpose, Wire
 from .forms import PlacesForm, jobsiteForm, WizNormalRoom
@@ -190,7 +192,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
 			'''jobsite end'''
 		else:
 			''' not jobsite, -plain place'''
-			context['action'] = context['type'] + ' details'
+			context['action'] = context['type'] + ' details'  # 'place details'
 			context['parent'] = Place2Place.objects.get(Child=context['place']).Parent  # doubtful ambiguous
 			# context.update(self.collect_devices(pk))
 			if not context['place'].Type.Abstract:
@@ -241,7 +243,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
 		# print(context['left_sidebar'])
 		# print(reverse_lazy('place-view', kwargs={'place_pk' : context['jobsite'].pk}))
 		context['select_menu'] = _('Overview')
-		print(context)
+		ic(context)
 		return context
 	
 	@property  # get class name

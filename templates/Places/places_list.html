@@ -176,10 +176,11 @@
 </div>
 <!-- NOT jobsite -->
 {% else %}
+	{{dev_grp}}
  	<div class="container mt-3">
-		{% if dev.items %}
+		{% if dev_grp.items %}
 		<div class="accordion" id="deviceAccordion">
-			{% for key, devices_qs in dev.items %}
+			{% for key, devices_qs in dev_grp.items %}
 				{% if devices_qs is not None %}
 					<div class="accordion-item">
 					<h2 class="accordion-header" id="heading{{ forloop.counter }}">
