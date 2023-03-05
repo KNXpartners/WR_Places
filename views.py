@@ -194,12 +194,9 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
 			''' not jobsite, -plain place'''
 			context['action'] = context['type'] + ' details'  # 'place details'
 			context['parent'] = Place2Place.objects.get(Child=context['place']).Parent  # doubtful ambiguous
-			# context.update(self.collect_devices(pk))
-			if not context['place'].Type.Abstract:
-				context.update(self.collect_device_groups_in_room(pk))
-				# print('++++++', context['dev'])
-			# new_context = self.collect_devices_group_by_line(pk)
 			
+			# if not context['place'].Type.Abstract:
+			# 	context.update(self.collect_device_groups_in_room(pk))
 			context.update(self.collect_devices(pk))
 			
 			context['parent_url'] = context['parent'].get_absolute_url()

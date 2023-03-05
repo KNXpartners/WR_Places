@@ -14,115 +14,82 @@
 <!-- Places_list.html -->
 
 {% include  'breadcrumb.html'%}
-<!-- <div class="container"><h3>"{{js.Name}}" {{action}}</h3>
-  type: {{type}} <br>
-  {{object_list}}
-</div> -->
 <!-- jobsite -->
 {% if type == 'jobsite' %}
-{% include 'Places/jobsite.html' %}
+	{% include 'Places/jobsite.html' %}
 
-<!-- NOT jobsite -->
+	<!-- NOT jobsite -->
 {% else %}
-<div class="container mt-1">
+	<div class="container mt-1">
 
-	<figure>
-		<blockquote class="blockquote">
-			<p><b>{{place}} (<i class="small text-secondary">{% trans place.Type.Name %}</i>)</b></p>
-		</blockquote>
-		<figcaption class="blockquote-footer">
-			at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i>{{ parent.Type.Name }}</i>) </b></a></cite>
-		</figcaption>
-	</figure>
+		<figure>
+			<blockquote class="blockquote">
+				<p><b>{{place}} (<i class="small text-secondary">{% trans place.Type.Name %}</i>)</b></p>
+			</blockquote>
+			<figcaption class="blockquote-footer">
+				at <cite title="Source Title"><a href={{parent.get_absolute_url}}><b class="small text-secondary">{{parent}} (<i>{{ parent.Type.Name }}</i>) </b></a></cite>
+			</figcaption>
+		</figure>
 
+		{#	{% for message in messages %}#}
+		{#		<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" >#}
+		{#				{{ message }}#}
+		{#			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"> </button>#}
+		{#		</div>#}
+		{#	{% endfor %}#}
 
-	<!-- {% for message in messages %}
-		<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" >
-				{{ message }}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"> </button>
-		</div>
-	{% endfor %} -->
-	<!-- {{dev}} <br>
-	{{dev.Device}} <br>
-	{{dev.Cabinet}} <br>
-	Abstract: {{place.Type.Abstract}} -->
+		<div class="d-flex flex-column align-items-start ">
+			{# Translators: Time of place creation #}
+			<p>{% translate "Created at" %}: <i>{{place.Date|date:"D d M Y"}}</i></p>
 
-	<div class="d-flex flex-column align-items-start ">
-		<!-- <p class="order-0 p-2" ><p class="align-self-start">details of <b>{{place}}(<i>{{place.Type}}</i>)</b>
-				@
-				<a href={{parent.get_absolute_url}}><b>{{parent}}(<i>{{parent.Type}}</i>) </b>.</a> -->
-		{# Translators: Time of place creation #}
-		<p>{% translate "Created at" %}: <i>{{place.Date|date:"D d M Y"}}</i></p>
-		{% if place.Description %}
-		<p>Description: <i>{{place.Description}}</i></p>
-		{% endif %}
-		{% if places|length > 0 or dev_stat %}
-		<p>
-			{% blocktranslate count counter=child_count %}
-			Contains: <i>{{ counter }} place, </i>
-			{% plural %}
-			Contains: <i>{{ counter }} places, </i>
-			{% endblocktranslate %}
-
-			{% if not place.Type.Abstract %}
-			{% blocktranslate count counter=dev_stat.Device|length %}
-			<i>, {{ counter }} device</i>
-			{% plural %}
-			<i>, {{ counter }} devices</i>
-			{% endblocktranslate %}
-			{% blocktranslate count counter=dev_stat.Cabinet|length %}
-			<i>, {{ counter }} cabinet.</i>
-			{% plural %}
-			<i>, {{ counter }} cabinets.</i>
-			{% endblocktranslate %}
+			{% if place.Description %}
+				<p>Description: <i>{{place.Description}}</i></p>
 			{% endif %}
-		</p>
-		<!-- <p>Contains: <i>{{child_count}} place{{places|pluralize}}
-		{% if not place.Type.Abstract %}
-				, {{dev.Device|length}} device{{dev.Device|pluralize}}, {{dev.Cabinet|length}} cabinet{{dev.Cabinet|pluralize}}</i>
-		{%endif%}
-		</p> -->
-		{% else %}
-		{% blocktranslate %}
-		<p>No places in <i> {{place}} </i> yet</p>
-		{% endblocktranslate %}
-		{% endif %}
-		<!-- <p>Here a information about functions in this {{place.Type.Name}} by installer  <b>"{{request.user.username}}"</b>
-		</p> -->
-		<!-- <p class="">Add fuction to this {{place}} mean add one or more device to this place. In case of connecting wire to device (inside device's details) will not encrease amount of devices in this {{place.Type.Name}}  </p> -->
-		<!-- <p class="align-self-start">{{room}} <br> number {{room.rNumber}},  {{room.rType}} , list of functions
-			</p> -->
-		<!-- <p>{%lorem%}</p> -->
+
+			{% if places|length > 0 or dev_stat %}
+				<p>
+					{% blocktranslate count counter=child_count %}
+						Contains: <i>{{ counter }} place, </i>
+						{% plural %}
+						Contains: <i>{{ counter }} places, </i>
+					{% endblocktranslate %}
+
+					{% if not place.Type.Abstract %}
+						{% blocktranslate count counter=dev_stat.Device|length %}
+							<i>, {{ counter }} device</i>
+							{% plural %}
+							<i>, {{ counter }} devices</i>
+						{% endblocktranslate %}
+
+						{% blocktranslate count counter=dev_stat.Cabinet|length %}
+							<i>, {{ counter }} cabinet.</i>
+							{% plural %}
+							<i>, {{ counter }} cabinets.</i>
+						{% endblocktranslate %}
+					{% endif %}
+				</p>
+			{% else %}
+				{% blocktranslate %}
+					<p>No places in <i> {{place}} </i> yet - var 1</p>
+				{% endblocktranslate %}
+			{% endif %}
+		</div>
 	</div>
-	<!-- <p class="align-self-end" style="font-size: 10px">request.path_info= <i>"{{request.path_info}}"</i>
-	</p> -->
-</div>
-<hr>
-<!-- places -->
-<!-- <h6>include places</h6> -->
+	<hr>
 
-<div class="container">
-	<!-- <h6>iclude place(s)</h6> -->
-	{% include 'Places/show_places.html' %}<!-- start paginator buttons -->
-	{% include 'Places/paginator.html'%}
-</div>
-
-<!-- add place -->
-
-{% include 'Places/add_edit_delete_buttons.html' %}
-
-
-<!-- buttons create devices -->
-{% if place.Type.Abstract is not True %}
-{% include "Places/create_buttons.html" %}
-<!-- <hr>
-	<div class="container mt-2">
-	<div class="container mt-2">
-		<a type="button" href={% url 'cabinet-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "cabinet" %}</a>
-		<a type="button" href={% url 'dev-create-view' %}?place={{place.pk}} class="btn btn-primary mb-2 col-12">{% translate "create" %} {% translate "device" %}</a>
+	<div class="container">
+		{% include 'Places/show_places.html' %}
+		{% include 'Places/paginator.html'%}
 	</div>
-	</div> -->
-{% endif %}
+
+
+	{% include 'Places/add_edit_delete_buttons.html' %}
+
+
+	<!-- buttons create devices -->
+	{% if place.Type.Abstract is not True %}
+		{% include "Places/create_buttons.html" %}
+	{% endif %}
 
 
 {% endif %}
@@ -134,74 +101,73 @@
 {% block aside-block %}
 
 {% if type == 'jobsite' %}
-<div class="container small">
-	<h6>
-		{% translate "statistic"%}
-	</h6>
-	<ul class="list-group list-group-flush">
-		<li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i></li>
-		<li class="list-group-item">{% translate "abstract" %} {% translate "places" %} :
-			<i>{{statistic.places.abstract}}</i></li>
-		<li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i>
-		</li>
-		{% for key, value in statistic.places.type.items %}
-		{% if value %}
-		<li class="list-group-item">{% translate key %} : <i>{{value}}</i></li>
-		{% endif %}
+	<div class="container small">
+		<h6>
+			{% translate "statistic"%}
+		</h6>
+		<ul class="list-group list-group-flush">
+			<li class="list-group-item">{% translate "places" %} : <i>{{statistic.places.all_places_qty}}</i></li>
+			<li class="list-group-item">{% translate "abstract" %} {% translate "places" %} :
+				<i>{{statistic.places.abstract}}</i></li>
+			<li class="list-group-item">{% translate "not" %} {% translate "abstract" %} {% translate "places" %} : <i>{{statistic.places.not_abstract}}</i>
+			</li>
+			{% for key, value in statistic.places.type.items %}
+			{% if value %}
+			<li class="list-group-item">{% translate key %} : <i>{{value}}</i></li>
+			{% endif %}
 
-		{% endfor%}
-		<span> <hr> </span>
-		{% for key, value in statistic.device.type.items %}
-		{% if value %}
-		<li class="list-group-item">{% trans key %}: <i>{{value}}</i></li>
-		{% endif %}
-		{% empty %}
-		{% translate "not" %} {% translate "device"%}
-		{% endfor%}
-		<span> <hr> </span>
-		{% for key, value in statistic.wire.WirePurpose.items %}
-		{% if value %}
-		<li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i></li>
-		{% endif %}
-		{% endfor%}
-		<span> <hr> </span>
-		<li class="list-group-item">{% trans "total cables" %}: <i>{{statistic.wire.total}}</i></li>
-		{% for key, value in statistic.wire.checked.items %}
-		{% if value %}
-		<li class="list-group-item">{% trans key %} {% trans "cables" %}: <i>{{value.0}} ({{value.1}}%)</i></li>
-		{% endif %}
-		{% endfor%}
+			{% endfor%}
+			<span> <hr> </span>
+			{% for key, value in statistic.device.type.items %}
+			{% if value %}
+			<li class="list-group-item">{% trans key %}: <i>{{value}}</i></li>
+			{% endif %}
+			{% empty %}
+			{% translate "not" %} {% translate "device"%}
+			{% endfor%}
+			<span> <hr> </span>
+			{% for key, value in statistic.wire.WirePurpose.items %}
+			{% if value %}
+			<li class="list-group-item">"{% trans key %}" {% trans "cable" %}: <i>{{value}}</i></li>
+			{% endif %}
+			{% endfor%}
+			<span> <hr> </span>
+			<li class="list-group-item">{% trans "total cables" %}: <i>{{statistic.wire.total}}</i></li>
+			{% for key, value in statistic.wire.checked.items %}
+			{% if value %}
+			<li class="list-group-item">{% trans key %} {% trans "cables" %}: <i>{{value.0}} ({{value.1}}%)</i></li>
+			{% endif %}
+			{% endfor%}
 
-	</ul>
-</div>
-<!-- NOT jobsite -->
+		</ul>
+	</div>
+	<!-- NOT jobsite -->
 {% else %}
-{#	{{dev_grp}}#}
  	<div class="container mt-3">
 		{% if dev_grp.items %}
 		<div class="accordion" id="deviceAccordion">
 			{% for key, devices_qs in dev_grp.items %}
 				{% if devices_qs is not None %}
 					<div class="accordion-item">
-					<h2 class="accordion-header" id="heading{{ forloop.counter }}">
-					{% if forloop.first %}
-					<button class="accordion-button" type="button" data-bs-toggle="collapse"
-					        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
-					        aria-controls="collapse{{ forloop.counter }}">
-						 {{key}}
-<!--						{% trans key %}-->
-					</button>
-					{% else %}
-					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-					        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
-					        aria-controls="collapse{{ forloop.counter }}">
-						 {{key}}
-<!--						{% trans key %}-->
-					</button>
-					{% endif %}
-				</h2>
+						<h2 class="accordion-header" id="heading{{ forloop.counter }}">
+							{% if forloop.first %}
+						<button class="accordion-button" type="button" data-bs-toggle="collapse"
+						        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+						        aria-controls="collapse{{ forloop.counter }}">
+							 {{key}}
+								{#{% trans key %}#}
+						</button>
+						{% else %}
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+						        aria-controls="collapse{{ forloop.counter }}">
+							 {{key}}
+							{#{% trans key %}#}
+						</button>
+						{% endif %}
+						</h2>
 
-				<div id="collapse{{ forloop.counter }}"
+						<div id="collapse{{ forloop.counter }}"
 				     {% if forloop.first %}
 				     class="accordion-collapse collapse show "
 				     {% else %}
@@ -225,8 +191,7 @@
 					</div>
 				</div>
 
-
-			</div>
+					</div>
 				{% endif %}
 			{% endfor %}
 		</div>
