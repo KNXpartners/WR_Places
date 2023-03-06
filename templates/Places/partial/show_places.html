@@ -1,0 +1,57 @@
+{% load i18n %}
+<!-- <p>Contains {{places|length}} places:</p> -->
+
+{#<div class="collapse" id="collapseExample">#}
+{#  <div class="card card-body">#}
+{#    Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.#}
+{#  </div>#}
+{#</div>#}
+
+{% for place in places %}
+	<div class="alert alert-light">
+	  <div class="d-flex justify-content-between">
+		  <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#collapseData{{forloop.counter}}" role="button" aria-expanded="false" aria-controls="collapseData{{forloop.counter}}">
+		      {{place}}
+		  </a>
+	    <span class="text-secondary small">Places: {{place.places_place2place_Parent.all.count}}; Devices: {{place.devices_device2place_Place.all.count}}</span>
+    </div>
+    <div class="collapse mt-1" id="collapseData{{forloop.counter}}">
+      <div class="row justify-content-around ">
+
+        <div class="mt-2 pt-2 col-5 border border-info rounded-2">
+          {% for p2p in place.places_place2place_Parent.all %}
+          <p class="py-0 my-0 text-secondary small">
+              {{forloop.counter}}. <a class="link-info" href="{{p2p.Child.get_absolute_url}}"><i>{{p2p.Child}}</i></a>
+          </p>
+          {% empty %}
+            <p class="text-info">{% trans "no places"%}</p>
+          {% endfor %}
+        </div>
+
+	      <div class="mt-2 pt-2 col-5 border border-secondary rounded-2">
+            {% for d2p in place.devices_device2place_Place.all %}
+              <p class="py-0 my-0 text-secondary small">{{forloop.counter}}. <a class="link-secondary" href="{{d2p.Child.get_absolute_url}}">{{d2p.Child}}</a></p>
+            {% empty %}
+              <p class="text-secondary">{% trans "no devices" %}</p>
+            {% endfor %}
+	      </div>
+
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="btn-group mt-2">
+          <a href="{% url 'place-view' place.pk %}" type="button" class="btn btn-outline-warning">{% trans "Choose" %} {{place}}</a>
+      </div>
+    </div>
+	</div>
+{%empty%}
+	<!-- No place in <b>{{place}}</b> yet -->
+    <div class="container">
+        {% blocktranslate trimmed %}
+            <p>No places in <i> {{place}} </i> yet</p>
+        {% endblocktranslate %}
+    </div>
+{% endfor%}
+<!-- {% include 'Places/paginator.html' %} -->
+<!-- finish paginator battons -->

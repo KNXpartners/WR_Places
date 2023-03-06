@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
 {% load i18n %}
+{% load static %}
+
 
 {% block title %}
 {{title}}
@@ -78,7 +80,7 @@
 	<hr>
 
 	<div class="container">
-		{% include 'Places/show_places.html' %}
+		{% include 'Places/partial/show_places.html' %}
 		{% include 'Places/paginator.html'%}
 	</div>
 
@@ -94,13 +96,20 @@
 
 {% endif %}
 
-
+<!-- Empty toast to show the message -->
+  <div class="toast-container position-fixed top-0 mt-5 mb-2 me-4 end-0 p-2" style="z-index:100;">
+    <div id="toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" >
+      <div class="d-flex">
+        <div id="toast-body" class="toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
 {% endblock content %}
 
 
 {% block aside-block %}
-
-{% if type == 'jobsite' %}
+	{% if type == 'jobsite' %}
 	<div class="container small">
 		<h6>
 			{% translate "statistic"%}
@@ -150,46 +159,55 @@
 				{% if devices_qs is not None %}
 					<div class="accordion-item">
 						<h2 class="accordion-header" id="heading{{ forloop.counter }}">
-							{% if forloop.first %}
-						<button class="accordion-button" type="button" data-bs-toggle="collapse"
-						        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"
-						        aria-controls="collapse{{ forloop.counter }}">
-							 {{key}}
+{#							{% if forloop.first %}#}
+{#								<button class="accordion-button" type="button" data-bs-toggle="collapse"#}
+{#								        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true"#}
+{#								        aria-controls="collapse{{ forloop.counter }}"#}
+{#								        hx-get="{% url 'collect-device-for-place' %}?place={{ place.id }}"#}
+{#				                hx-trigger="click"#}
+{#				                hx-target="#acc-body-{{ forloop.counter }}"#}
+{#								>#}
+{#								  {{key}}#}
+									{#{% trans key %}#}
+{#								</button>#}
+{##}
+{#						{% else %}#}
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+							        aria-controls="collapse{{ forloop.counter }}"
+											 hx-get="{% url 'collect-device-for-place' %}?place={{ place.id }}"
+				                hx-trigger="click once"
+				                hx-target="#acc-body-{{ forloop.counter }}"
+												hx-indicator="#htmx-spinner">
+								 {{key}}
+								<img  id="htmx-spinner" class="htmx-indicator ms-2" src="/static/icons/bars.svg" width="20"/>
 								{#{% trans key %}#}
-						</button>
-						{% else %}
-						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-						        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
-						        aria-controls="collapse{{ forloop.counter }}">
-							 {{key}}
-							{#{% trans key %}#}
-						</button>
-						{% endif %}
+							</button>
+{#						{% endif %}#}
 						</h2>
 
+
 						<div id="collapse{{ forloop.counter }}"
-				     {% if forloop.first %}
-				     class="accordion-collapse collapse show "
-				     {% else %}
-				     class="accordion-collapse collapse"
-				     {% endif %}
-				     aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceAccordion">
-					<div class="accordion-body">
-						{% for grp in devices_qs %}
-							<div class="alert alert-light ">
-								<div> group of	<strong>{{ grp.GroupType }}</strong> ({{grp.QntyMembers}} devices)</div>
-								<a href="{% url 'dev-details-view'  dev_pk=grp.id %}" type="button" class="btn btn-outline-primary mt-1">
-									{{ grp.GroupName }}
-								</a>
-								{% if key == 'Device' %}
-									<p class="lh-1">
-										<a href="{{ grp.wires_wire_Child.last.get_absolute_url }}" class="small ">{{grp.wires_wire_Child.last}}</a>
-									</p>
-								{% endif %}
+{#						     class="accordion-collapse collapse {%if forloop.first%} show{%endif%}"#}
+						     class="accordion-collapse collapse"
+				         aria-labelledby="heading{{ forloop.counter }}"
+				         data-bs-parent="#deviceAccordion">
+							<div class="accordion-body" id="acc-body-{{ forloop.counter }}">
+{#								{% for grp in devices_qs %}#}
+{#									<div class="alert alert-light ">#}
+{#										<div> group of	<strong>{{ grp.GroupType }}</strong> ({{grp.QntyMembers}} devices)</div>#}
+{#										<a href="{% url 'dev-details-view'  dev_pk=grp.id %}" type="button" class="btn btn-outline-primary mt-1">#}
+{#											{{ grp.GroupName }}#}
+{#										</a>#}
+{#										{% if key == 'Device' %}#}
+{#											<p class="lh-1">#}
+{#												<a href="{{ grp.wires_wire_Child.last.get_absolute_url }}" class="small ">{{grp.wires_wire_Child.last}}</a>#}
+{#											</p>#}
+{#										{% endif %}#}
+{#									</div>#}
+{#								{% endfor %}#}
 							</div>
-						{% endfor %}
-					</div>
-				</div>
+						</div>
 
 					</div>
 				{% endif %}
@@ -199,3 +217,11 @@
 	</div>
 {%endif%}
 {% endblock aside-block %}
+
+
+{% block script %}
+<!-- <script defer src="https://unpkg.com/hyperscript.org@0.9.5"></script> -->
+<script defer src="https://unpkg.com/htmx.org@1.6.1/dist/htmx.min.js"></script>
+<script defer src="{% static 'device/htmx_toast.js' %}"></script>
+
+{% endblock script %}

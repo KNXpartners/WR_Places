@@ -195,8 +195,8 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
 			context['action'] = context['type'] + ' details'  # 'place details'
 			context['parent'] = Place2Place.objects.get(Child=context['place']).Parent  # doubtful ambiguous
 			
-			# if not context['place'].Type.Abstract:
-			# 	context.update(self.collect_device_groups_in_room(pk))
+			if not context['place'].Type.Abstract:
+				context.update(self.collect_device_groups_in_room(pk))
 			context.update(self.collect_devices(pk))
 			
 			context['parent_url'] = context['parent'].get_absolute_url()
@@ -205,8 +205,7 @@ class placeView(JsDataContextMixin, LoginRequiredMixin, ListView):
 		
 		_choices = [(k[0], _(k[1])) for k in
 		            PlaceType.objects.filter(places_inheritances_Child__Parent__Name=context[
-			            'place'].Type).values_list(
-			            'id', 'Name')]
+			            'place'].Type).values_list('id', 'Name')]
 		
 		if (5, 'room') in _choices and False:
 			context['btn_side_menu'] = {
