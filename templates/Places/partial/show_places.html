@@ -10,8 +10,14 @@
 {% for place in places %}
 	<div class="alert alert-light">
 	  <div class="d-flex justify-content-between">
-		  <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#collapseData{{forloop.counter}}" role="button" aria-expanded="false" aria-controls="collapseData{{forloop.counter}}">
-		      {{place}}
+		  <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#collapseData{{forloop.counter}}" role="button" aria-expanded="false" aria-controls="collapseData{{forloop.counter}}"
+		    hx-trigger="click once"
+		     hx-target="#collapseData-device-{{forloop.counter}}"
+		     hx-get="{% url 'collect-group-for-place' %}?place={{place.pk}}&type=Groups"
+		     hx-indicator="#htmx-spinner-grp-{{forloop.counter}}"
+		  >
+	      {{place}}
+
 		  </a>
 	    <span class="text-secondary small">Places: {{place.places_place2place_Parent.all.count}}; Devices: {{place.devices_device2place_Place.all.count}}</span>
     </div>
@@ -28,12 +34,16 @@
           {% endfor %}
         </div>
 
-	      <div class="mt-2 pt-2 col-5 border border-secondary rounded-2">
-            {% for d2p in place.devices_device2place_Place.all %}
-              <p class="py-0 my-0 text-secondary small">{{forloop.counter}}. <a class="link-secondary" href="{{d2p.Child.get_absolute_url}}">{{d2p.Child}}</a></p>
-            {% empty %}
-              <p class="text-secondary">{% trans "no devices" %}</p>
-            {% endfor %}
+	      <div class="mt-2 pt-2 col-5 border border-secondary rounded-2"
+	      id="collapseData-device-{{forloop.counter}}">
+	      Wait...
+				<img  id="htmx-spinner-grp-{{forloop.counter}}" class="htmx-indicator ms-2" src="/static/icons/bars.svg" width="20"/>
+
+{#            {% for d2p in place.devices_device2place_Place.all %}#}
+{#              <p class="py-0 my-0 text-secondary small">{{forloop.counter}}. <a class="link-secondary" href="{{d2p.Child.get_absolute_url}}">{{d2p.Child}}</a></p>#}
+{#            {% empty %}#}
+{#              <p class="text-secondary">{% trans "no devices" %}</p>#}
+{#            {% endfor %}#}
 	      </div>
 
       </div>

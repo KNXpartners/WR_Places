@@ -70,10 +70,10 @@
 						{% endblocktranslate %}
 					{% endif %}
 				</p>
-			{% else %}
-				{% blocktranslate %}
-					<p>No places in <i> {{place}} </i> yet - var 1</p>
-				{% endblocktranslate %}
+{#			{% else %}#}
+{#				{% blocktranslate %}#}
+{#					<p>No places in <i> {{place}} </i> yet - var 1</p>#}
+{#				{% endblocktranslate %}#}
 			{% endif %}
 		</div>
 	</div>
@@ -156,7 +156,7 @@
 		{% if dev_grp.items %}
 		<div class="accordion" id="deviceAccordion">
 			{% for key, devices_qs in dev_grp.items %}
-				{% if devices_qs is not None %}
+				{% if devices_qs|length > 0 %}
 					<div class="accordion-item">
 						<h2 class="accordion-header" id="heading{{ forloop.counter }}">
 {#							{% if forloop.first %}#}
@@ -175,12 +175,12 @@
 							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
 							        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
 							        aria-controls="collapse{{ forloop.counter }}"
-											 hx-get="{% url 'collect-device-for-place' %}?place={{ place.id }}"
+											 hx-get="{% url 'collect-group-for-place' %}?place={{ place.id }}&type={{ key }}"
 				                hx-trigger="click once"
 				                hx-target="#acc-body-{{ forloop.counter }}"
-												hx-indicator="#htmx-spinner">
+												hx-indicator="#htmx-spinner-{{ forloop.counter }}">
 								 {{key}}
-								<img  id="htmx-spinner" class="htmx-indicator ms-2" src="/static/icons/bars.svg" width="20"/>
+								<img  id="htmx-spinner-{{ forloop.counter }}" class="htmx-indicator ms-2" src="/static/icons/bars.svg" width="20"/>
 								{#{% trans key %}#}
 							</button>
 {#						{% endif %}#}
